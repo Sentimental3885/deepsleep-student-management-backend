@@ -1,3 +1,23 @@
 spring:
   application:
     name: deeepsleep-student-management-backend
+
+  datasource:
+    url: jdbc:mysql://202.194.14.120:3306/java_3_35
+    username: java_3_35
+    password: ${DB_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+
+# MyBatis 配置
+mybatis:
+  mapper-locations: classpath:mapper/*.xml
+  type-aliases-package: cn.edu.sdu.aireviewassistant.entity
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+# 日志
+logging:
+  level:
+    com.deepsleep: debug
