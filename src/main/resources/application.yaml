@@ -1,3 +1,9 @@
 spring:
   application:
     name: deeepsleep-student-management-backend
+
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://8.130.108.118:3306/ds-student-management-db
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
