@@ -1,8 +1,6 @@
 package com.deepsleep.data.vo;
 
 import com.deepsleep.data.enums.ResultCode;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
 
 public record Result<T> (
         Integer code, // 业务状态码
