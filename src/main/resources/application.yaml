@@ -3,7 +3,21 @@ spring:
     name: deeepsleep-student-management-backend
 
   datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://8.130.108.118:3306/ds-student-management-db
-    username: ${DB_USERNAME}
+    url: jdbc:mysql://202.194.14.120:3306/java_3_35
+    username: java_3_35
     password: ${DB_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+
+# MyBatis 配置
+mybatis:
+  mapper-locations: classpath:mapper/*.xml
+  type-aliases-package: com.deepsleep.data.po
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+# 日志
+logging:
+  level:
+    com.deepsleep: debug
