@@ -26,19 +26,18 @@ public record Result<T> (
         return new Result<>(200, null, "success");
     }
 
-
-    /**
-     * 返回错误结果
-     */
-    public static <T> Result<T> error(Integer code, String msg) {
-        return new Result<>(code, null, msg);
-    }
-
     /**
      * 配合自定义异常枚举使用
      */
     public static <T> Result<T> error(ResultCode resultCode){
         return new Result<>(resultCode.getCode(),null,resultCode.getMsg());
+    }
+
+    /**
+     * 返回错误结果
+     */
+    public static <T> Result<T> error(ResultCode resultCode, String msg) {
+        return new Result<>(resultCode.getCode(), null, msg);
     }
 
     public boolean isSuccess() {
