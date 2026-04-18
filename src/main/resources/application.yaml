@@ -21,3 +21,6 @@ mybatis:
 logging:
   level:
     com.deepsleep: debug
+
+server:
+  port: 22224
