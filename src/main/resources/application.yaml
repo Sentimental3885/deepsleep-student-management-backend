@@ -12,7 +12,7 @@ spring:
 # MyBatis 配置
 mybatis:
   mapper-locations: classpath:mapper/*.xml
-  type-aliases-package: com.deepsleep.data.po
+  type-aliases-package: cn.edu.sdu.aireviewassistant.entity
   configuration:
     map-underscore-to-camel-case: true
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
@@ -21,3 +21,12 @@ mybatis:
 logging:
   level:
     com.deepsleep: debug
+
+
+#jwt
+jwt:
+  secret: deeepsleep2026studentmanagementbackendsecretkey
+  expiration: 86400000
+
+server:
+  port: 22224
