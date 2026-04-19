@@ -1,6 +1,5 @@
 package com.deepsleep.controller;
 
-import com.deepsleep.annotation.RequireRole;
 import com.deepsleep.data.dto.LoginDTO;
 import com.deepsleep.data.vo.LoginVO;
 import com.deepsleep.data.vo.Result;
@@ -24,7 +23,6 @@ public class AuthController {
      * @return logi
      *
      */
-    @RequireRole({})
     @PostMapping("/login")
     public Result<LoginVO> login(@RequestBody @Valid LoginDTO loginDTO){
         return Result.success(authService.login(loginDTO));
