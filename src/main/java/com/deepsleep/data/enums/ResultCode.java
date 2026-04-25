@@ -18,6 +18,16 @@ public enum ResultCode {
     USER_NOT_FOUND(1004, "用户不存在", HttpStatus.NOT_FOUND),
     PASSWORD_ERROR(1001, "用户名或密码错误", HttpStatus.UNAUTHORIZED),
     USER_DISABLED(1003, "账号已被禁用", HttpStatus.FORBIDDEN),
+
+    STUDENT_NOT_FOUND(2000, "学生不存在", HttpStatus.NOT_FOUND),
+    COURSE_NOT_FOUND(2001, "课程不存在", HttpStatus.NOT_FOUND),
+    COURSE_UNPICKABLE(2002, "课程不可选", HttpStatus.CONFLICT),
+    COURSE_FULL(2003, "课程已满员", HttpStatus.CONFLICT),
+    SELECTION_NOT_FOUND(2100, "课程未被选", HttpStatus.NOT_FOUND),
+    COURSE_ALREADY_PICKED(2102, "课程已被选", HttpStatus.CONFLICT),
+    COURSE_ALREADY_DROPPED(2103, "课程已退选", HttpStatus.CONFLICT),
+    COURSE_ALREADY_OVER(2104, "课程已修完", HttpStatus.CONFLICT),
+    INVALID_SCORE(2105, "分数非法", HttpStatus.BAD_REQUEST),
     ;
 
     private final Integer code;
