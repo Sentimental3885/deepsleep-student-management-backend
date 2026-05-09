@@ -27,7 +27,8 @@ public enum ResultCode {
     COURSE_ALREADY_PICKED(2102, "课程已被选", HttpStatus.CONFLICT),
     COURSE_ALREADY_DROPPED(2103, "课程已退选", HttpStatus.CONFLICT),
     COURSE_ALREADY_OVER(2104, "课程已修完", HttpStatus.CONFLICT),
-    INVALID_SCORE(2105, "分数非法", HttpStatus.BAD_REQUEST),
+    TEACHER_UNAUTHORIZED(2200, "教师无权结课", HttpStatus.UNAUTHORIZED),
+    INVALID_SCORE(2201, "分数非法", HttpStatus.BAD_REQUEST),
     ;
 
     private final Integer code;
