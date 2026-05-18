@@ -6,6 +6,7 @@ import com.deepsleep.data.enums.ResultCode;
 import com.deepsleep.data.enums.RoleEnum;
 import com.deepsleep.exception.BusinessException;
 import com.deepsleep.util.JwtUtil;
+import com.deepsleep.util.RedisUtil;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +25,7 @@ import java.util.Arrays;
 @RequiredArgsConstructor
 public class AuthAspect {
     private final JwtUtil jwtUtil;
+    private final RedisUtil redisUtil;
 
     @Around("@annotation(com.deepsleep.annotation.RequireLogin) || " +
             "@annotation(com.deepsleep.annotation.RequireRole)")
@@ -34,6 +36,13 @@ public class AuthAspect {
         String header = request.getHeader("Authorization");
 
         if(header==null||!header.startsWith("Bearer ")){
+            throw new BusinessException(ResultCode.UNAUTHORIZED);
+        }
+
+        // 解析成功后检查是否在黑名单
+        String token = header.substring(7);
+        String blacklistKey = "blacklist:" + token;
+        if (redisUtil.hasKey(blacklistKey)) {
             throw new BusinessException(ResultCode.UNAUTHORIZED);
         }
 

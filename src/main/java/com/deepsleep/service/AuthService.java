@@ -5,4 +5,6 @@ import com.deepsleep.data.vo.LoginVO;
 
 public interface AuthService {
     LoginVO login(LoginDTO dto);
+
+    void logout(String token);
 }

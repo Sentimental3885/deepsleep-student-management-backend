@@ -1,4 +1,4 @@
-package com.deepsleep.service;
+package com.deepsleep.service.Impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -12,13 +12,14 @@ import com.deepsleep.exception.BusinessException;
 import com.deepsleep.mapper.CourseMapper;
 import com.deepsleep.mapper.CourseSelectionMapper;
 import com.deepsleep.mapper.StudentMapper;
+import com.deepsleep.service.SelectionService;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
-public class SelectionServiceImpl implements SelectionService{
+public class SelectionServiceImpl implements SelectionService {
 
     @Resource
     private CourseSelectionMapper selectionMapper;

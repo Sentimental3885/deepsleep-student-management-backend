@@ -18,6 +18,8 @@ public enum ResultCode {
     USER_NOT_FOUND(1004, "用户不存在", HttpStatus.NOT_FOUND),
     PASSWORD_ERROR(1001, "用户名或密码错误", HttpStatus.UNAUTHORIZED),
     USER_DISABLED(1003, "账号已被禁用", HttpStatus.FORBIDDEN),
+    PHONE_CONFLICTED(1005,"手机号已被占用",HttpStatus.CONFLICT),
+    EMAIL_CONFLICT(409, "邮箱已被占用", HttpStatus.CONFLICT),
 
     STUDENT_NOT_FOUND(2000, "学生不存在", HttpStatus.NOT_FOUND),
     COURSE_NOT_FOUND(2001, "课程不存在", HttpStatus.NOT_FOUND),
