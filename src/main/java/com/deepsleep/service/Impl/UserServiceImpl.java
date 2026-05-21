@@ -2,9 +2,9 @@ package com.deepsleep.service.Impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.deepsleep.context.UserContext;
-import com.deepsleep.data.dto.UpdateContactDTO;
 import com.deepsleep.data.dto.UpdatePasswordDTO;
 import com.deepsleep.data.dto.UpdateStudentDTO;
+import com.deepsleep.data.dto.VerifyContactDTO;
 import com.deepsleep.data.enums.ResultCode;
 import com.deepsleep.data.po.Student;
 import com.deepsleep.data.po.Teacher;
@@ -14,6 +14,7 @@ import com.deepsleep.data.vo.TeacherInfoVO;
 import com.deepsleep.data.vo.UserProfileVO;
 import com.deepsleep.exception.BusinessException;
 import com.deepsleep.mapper.*;
+import com.deepsleep.service.EmailService;
 import com.deepsleep.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.mindrot.jbcrypt.BCrypt;
@@ -28,7 +29,7 @@ public class UserServiceImpl implements UserService {
     private final DeptMapper deptMapper;
     private final MajorMapper majorMapper;
     private final ClazzMapper clazzMapper;
-
+    private final EmailService emailService;
 
     @Override
     public UserProfileVO getProfile() {
@@ -73,8 +74,13 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void updateContact(UpdateContactDTO dto) {
+    public void updateContact(VerifyContactDTO dto) {
         Long userId = UserContext.getUserId();
+
+        // 先校验验证码
+        if (dto.getEmail() != null) {
+            emailService.verifyCode(dto.getEmail(), dto.getCode());
+        }
 
         if(dto.getPhone()!=null){
             Long count = userMapper.selectCount(new LambdaQueryWrapper<User>()

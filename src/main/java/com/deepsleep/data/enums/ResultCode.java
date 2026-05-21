@@ -14,6 +14,8 @@ public enum ResultCode {
     FORBIDDEN(403, "权限不足", HttpStatus.FORBIDDEN),
     NOT_FOUND(404, "资源不存在", HttpStatus.NOT_FOUND),
     INTERVAL_SERVER_ERROR(500, "服务器内部错误", HttpStatus.INTERNAL_SERVER_ERROR),
+    CODE_EXPIRED(400, "验证码已过期", HttpStatus.BAD_REQUEST),
+    CODE_ERROR(400, "验证码错误", HttpStatus.BAD_REQUEST),
 
     USER_NOT_FOUND(1004, "用户不存在", HttpStatus.NOT_FOUND),
     PASSWORD_ERROR(1001, "用户名或密码错误", HttpStatus.UNAUTHORIZED),

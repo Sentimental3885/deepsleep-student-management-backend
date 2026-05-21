@@ -2,9 +2,9 @@ package com.deepsleep.controller;
 
 import com.deepsleep.annotation.RequireLogin;
 import com.deepsleep.annotation.RequireRole;
-import com.deepsleep.data.dto.UpdateContactDTO;
 import com.deepsleep.data.dto.UpdatePasswordDTO;
 import com.deepsleep.data.dto.UpdateStudentDTO;
+import com.deepsleep.data.dto.VerifyContactDTO;
 import com.deepsleep.data.enums.RoleEnum;
 import com.deepsleep.data.vo.Result;
 import com.deepsleep.data.vo.UserProfileVO;
@@ -34,7 +34,7 @@ public class UserController {
      */
     @RequireLogin
     @PutMapping("/contact")
-    public Result<Void> updateContact(@RequestBody @Valid UpdateContactDTO dto) {
+    public Result<Void> updateContact(@RequestBody @Valid VerifyContactDTO dto) {
         userService.updateContact(dto);
         return Result.success();
     }
