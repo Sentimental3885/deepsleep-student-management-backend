@@ -56,9 +56,7 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     *
-     * @param e
-     * @re
+     * JWT异常
      */
     @ExceptionHandler(JwtException.class)
     public ResponseEntity<Result<Void>> handleJwtException(JwtException e) {

@@ -21,5 +21,6 @@ public class AddStudentDTO {
     private Long mid;
     @NotNull(message = "班级id不能为空")
     private Long zid;
+    @NotNull(message = "入学日期不能为空")
     private LocalDate entryDate;
 }

@@ -5,7 +5,7 @@ import lombok.Data;
 import java.time.LocalDate;
 
 @Data
-public class StudentInfoVO {
+public class StudentProfileVO {
     private Long deptId;
     private String deptName;
     private Long majorId;

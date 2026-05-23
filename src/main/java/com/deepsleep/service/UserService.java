@@ -1,16 +1,15 @@
 package com.deepsleep.service;
 
 
+import com.deepsleep.data.dto.UpdateEmailDTO;
 import com.deepsleep.data.dto.UpdatePasswordDTO;
-import com.deepsleep.data.dto.UpdateStudentDTO;
-import com.deepsleep.data.dto.VerifyContactDTO;
-import com.deepsleep.data.vo.UserProfileVO;
+import com.deepsleep.data.dto.UpdatePhoneDTO;
 
 public interface UserService {
 
-    UserProfileVO getProfile();
 
-    void updateContact(VerifyContactDTO dto);
+
+    void updateEmail(UpdateEmailDTO dto);
+    void updatePhone(UpdatePhoneDTO dto);
     void updatePassword(UpdatePasswordDTO dto);
-    void updateStudentInfo(UpdateStudentDTO dto);
 }

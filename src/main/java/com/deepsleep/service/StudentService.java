@@ -1,8 +1,12 @@
 package com.deepsleep.service;
 
-import com.deepsleep.data.dto.AddStudentDTO;
-import com.deepsleep.data.vo.Result;
+
+import com.deepsleep.data.dto.UpdateStudentDTO;
+import com.deepsleep.data.vo.StudentProfileVO;
 
 public interface StudentService {
-    Result<Void> addStudent(AddStudentDTO dto);
+
+
+    StudentProfileVO getStudentProfile();
+    void updateStudentInfo(UpdateStudentDTO dto);
 }

@@ -1,26 +1,40 @@
 package com.deepsleep.controller;
 
 import com.deepsleep.annotation.RequireRole;
-import com.deepsleep.data.dto.AddStudentDTO;
+import com.deepsleep.data.dto.UpdateStudentDTO;
 import com.deepsleep.data.enums.RoleEnum;
 import com.deepsleep.data.vo.Result;
+import com.deepsleep.data.vo.StudentProfileVO;
 import com.deepsleep.service.StudentService;
-import jakarta.annotation.Resource;
-import jakarta.validation.Valid;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.*;
 
+/**
+ * 学生特有操作：如查看学生个人信息，查看课表等
+ */
 @RequestMapping("/student")
 @RestController
+@RequiredArgsConstructor
 public class StudentController {
-    @Resource
-    private StudentService studentService;
 
-    @RequireRole(RoleEnum.ADMIN)
-    @PostMapping("/add")
-    public Result<Void> addStudent(@RequestBody @Valid AddStudentDTO dto){
-        return studentService.addStudent(dto);
+    private final StudentService studentService;
+
+    /**
+     * 获取学生个人信息
+     */
+    @RequireRole(RoleEnum.STUDENT)
+    @GetMapping("/profile")
+    public Result<StudentProfileVO> getStudentProfile() {
+        return Result.success(studentService.getStudentProfile());
+    }
+
+    /**
+     * 更新学生个人信息
+     */
+    @RequireRole(RoleEnum.STUDENT)
+    @PutMapping("/profile")
+    public Result<Void> updateStudentInfo(@RequestBody UpdateStudentDTO dto) {
+        studentService.updateStudentInfo(dto);
+        return Result.success();
     }
 }

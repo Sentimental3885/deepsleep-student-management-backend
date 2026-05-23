@@ -2,16 +2,11 @@ package com.deepsleep.service.Impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.deepsleep.context.UserContext;
+import com.deepsleep.data.dto.UpdateEmailDTO;
 import com.deepsleep.data.dto.UpdatePasswordDTO;
-import com.deepsleep.data.dto.UpdateStudentDTO;
-import com.deepsleep.data.dto.VerifyContactDTO;
+import com.deepsleep.data.dto.UpdatePhoneDTO;
 import com.deepsleep.data.enums.ResultCode;
-import com.deepsleep.data.po.Student;
-import com.deepsleep.data.po.Teacher;
 import com.deepsleep.data.po.User;
-import com.deepsleep.data.vo.StudentInfoVO;
-import com.deepsleep.data.vo.TeacherInfoVO;
-import com.deepsleep.data.vo.UserProfileVO;
 import com.deepsleep.exception.BusinessException;
 import com.deepsleep.mapper.*;
 import com.deepsleep.service.EmailService;
@@ -24,91 +19,57 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
     private final UserMapper userMapper;
-    private final StudentMapper studentMapper;
-    private final TeacherMapper teacherMapper;
-    private final DeptMapper deptMapper;
-    private final MajorMapper majorMapper;
-    private final ClazzMapper clazzMapper;
     private final EmailService emailService;
 
+
     @Override
-    public UserProfileVO getProfile() {
+    public void updateEmail(UpdateEmailDTO dto) {
         Long userId = UserContext.getUserId();
+        // 先验证验证码
+        emailService.verifyCode(dto.getEmail(), dto.getCode());
+        // 邮箱是否被占用
+        Long count = userMapper.selectCount(
+                new LambdaQueryWrapper<User>()
+                        .eq(User::getEmail, dto.getEmail())
+                        .ne(User::getId, userId)
+        );
+        if (count > 0) throw new BusinessException(ResultCode.EMAIL_CONFLICT);
+
+        User newUser = new User();
+        newUser.setId(userId);
+        newUser.setEmail(dto.getEmail());
+        userMapper.updateById(newUser);
+    }
+
+    @Override
+    public void updatePhone(UpdatePhoneDTO dto) {
+        Long userId = UserContext.getUserId();
+        // 取邮箱校验验证码
         User user = userMapper.selectById(userId);
+        if (user.getEmail() == null) throw new BusinessException(ResultCode.EMAIL_NOT_BOUND);
+        emailService.verifyCode(user.getEmail(), dto.getCode());
+        // 检查手机号是否被占用
+        Long count = userMapper.selectCount(
+                new LambdaQueryWrapper<User>()
+                        .eq(User::getPhone, dto.getPhone())
+                        .ne(User::getId, userId)
+        );
+        if (count > 0) throw new BusinessException(ResultCode.PHONE_CONFLICTED);
 
-        UserProfileVO vo = new UserProfileVO();
-        vo.setId(user.getId());
-        vo.setUsername(user.getUsername());
-        vo.setName(user.getName());
-        vo.setPhone(user.getPhone());
-        vo.setEmail(user.getEmail());
-        vo.setAvatar(user.getAvatar());
-        vo.setGender(user.getGender());
-        vo.setRole(user.getRole());
-
-        if (user.getRole() == 2) { // 学生
-            Student student = studentMapper.selectById(userId);
-            StudentInfoVO studentInfoVO = new StudentInfoVO();
-            studentInfoVO.setDeptId(student.getDeptId());
-            studentInfoVO.setMajorId(student.getMajorId());
-            studentInfoVO.setClazzId(student.getClazzId());
-            studentInfoVO.setPosition(student.getPosition());
-            studentInfoVO.setEntryDate(student.getEntryDate());
-
-            studentInfoVO.setDeptName(deptMapper.selectById(student.getDeptId()).getName());
-            studentInfoVO.setMajorName(majorMapper.selectById(student.getMajorId()).getName());
-            studentInfoVO.setClazzName(clazzMapper.selectById(student.getClazzId()).getName());
-            vo.setStudentInfo(studentInfoVO);
-
-        } else if (user.getRole() == 1) { // 教师
-            Teacher teacher = teacherMapper.selectById(userId);
-            TeacherInfoVO teacherInfoVO = new TeacherInfoVO();
-            teacherInfoVO.setDeptId(teacher.getDeptId());
-            teacherInfoVO.setTitle(teacher.getTitle());
-            teacherInfoVO.setEntryDate(teacher.getEntryDate());
-            teacherInfoVO.setDeptName(deptMapper.selectById(teacher.getDeptId()).getName());
-            vo.setTeacherInfo(teacherInfoVO);
-        }
-
-        return vo;
+        User update = new User();
+        update.setId(userId);
+        update.setPhone(dto.getPhone());
+        userMapper.updateById(update);
     }
 
-    @Override
-    public void updateContact(VerifyContactDTO dto) {
-        Long userId = UserContext.getUserId();
 
-        // 先校验验证码
-        if (dto.getEmail() != null) {
-            emailService.verifyCode(dto.getEmail(), dto.getCode());
-        }
-
-        if(dto.getPhone()!=null){
-            Long count = userMapper.selectCount(new LambdaQueryWrapper<User>()
-                    .eq(User::getPhone,dto.getPhone()).ne(User::getId,userId));
-            if (count>0) throw new BusinessException(ResultCode.PHONE_CONFLICTED);
-        }
-
-        if (dto.getEmail() != null) {
-            Long count = userMapper.selectCount(
-                    new LambdaQueryWrapper<User>()
-                            .eq(User::getEmail, dto.getEmail())
-                            .ne(User::getId, userId)
-            );
-            if (count>0) throw new BusinessException(ResultCode.EMAIL_CONFLICT);
-        }
-
-        User user = new User();
-        user.setId(userId);
-        user.setPhone(dto.getPhone());
-        user.setEmail(dto.getEmail());
-        userMapper.updateById(user);
-    }
 
     @Override
     public void updatePassword(UpdatePasswordDTO dto) {
         Long userId = UserContext.getUserId();
         User user = userMapper.selectById(userId);
-        if(!BCrypt.checkpw(dto.getOldPassword(),user.getPasswordHash())) throw new BusinessException(ResultCode.PASSWORD_ERROR);
+        if (user.getEmail() == null) throw new BusinessException(ResultCode.EMAIL_NOT_BOUND);
+        emailService.verifyCode(user.getEmail(),dto.getCode());
 
         User update = new User();
         update.setId(userId);
@@ -116,15 +77,4 @@ public class UserServiceImpl implements UserService {
         userMapper.updateById(update);
     }
 
-    @Override
-    public void updateStudentInfo(UpdateStudentDTO dto) {
-        Long userId = UserContext.getUserId();
-
-        Student student = new Student();
-        student.setUserId(userId);
-        student.setClazzId(dto.getClazzId());
-        student.setPosition(dto.getPosition());
-        student.setEntryDate(dto.getEntryDate());
-        studentMapper.updateById(student);
-    }
 }
