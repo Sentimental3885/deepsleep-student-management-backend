@@ -1,17 +1,19 @@
 package com.deepsleep.service.Impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.deepsleep.data.dto.AddStudentDTO;
 import com.deepsleep.data.dto.AddTeacherDTO;
+import com.deepsleep.data.dto.UserQueryDTO;
 import com.deepsleep.data.enums.ResultCode;
 import com.deepsleep.data.enums.RoleEnum;
 import com.deepsleep.data.po.Student;
 import com.deepsleep.data.po.Teacher;
 import com.deepsleep.data.po.User;
+import com.deepsleep.data.vo.AdminUserDetailVO;
+import com.deepsleep.data.vo.AdminUserVO;
 import com.deepsleep.exception.BusinessException;
-import com.deepsleep.mapper.StudentMapper;
-import com.deepsleep.mapper.TeacherMapper;
-import com.deepsleep.mapper.UserMapper;
+import com.deepsleep.mapper.*;
 import com.deepsleep.service.AdminService;
 import lombok.RequiredArgsConstructor;
 import org.mindrot.jbcrypt.BCrypt;
@@ -19,6 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @RequiredArgsConstructor
 @Service
@@ -27,6 +30,9 @@ public class AdminServiceImpl implements AdminService {
     private final UserMapper userMapper;
     private final TeacherMapper teacherMapper;
     private final StudentMapper studentMapper;
+    private final DeptMapper deptMapper;
+    private final MajorMapper majorMapper;
+    private final ClazzMapper clazzMapper;
 
 
     //根据学生信息自动创建user和student条目
@@ -123,5 +129,77 @@ public class AdminServiceImpl implements AdminService {
         }
 
         userMapper.deleteById(userId);
+    }
+
+    @Override
+    public Page<AdminUserVO> getUserList(UserQueryDTO dto) {
+        Page<User> page = userMapper.selectPage(
+                new Page<>(dto.getPageNum(),dto.getPageSize()),
+                new LambdaQueryWrapper<User>().like(dto.getName()!=null,User::getName,dto.getName())
+                        .eq(dto.getUsername()!=null,User::getUsername,dto.getUsername())
+                        .eq(dto.getRole() != null,User::getRole,dto.getRole())
+                        .orderByDesc(User::getCreateTime)
+        );
+        Page<AdminUserVO> voPage = new Page<>(page.getCurrent(), page.getSize(), page.getTotal());
+        List<AdminUserVO> voList = page.getRecords().stream().map(user -> {
+            AdminUserVO vo = new AdminUserVO();
+            vo.setId(user.getId());
+            vo.setUsername(user.getUsername());
+            vo.setName(user.getName());
+            vo.setPhone(user.getPhone());
+            vo.setEmail(user.getEmail());
+            vo.setGender(user.getGender());
+            vo.setRole(user.getRole());
+            vo.setCreateTime(user.getCreateTime());
+            return vo;
+        }).toList();
+
+        voPage.setRecords(voList);
+        return voPage;
+    }
+
+    @Override
+    public AdminUserDetailVO getUserDetail(Long userId) {
+        User user = userMapper.selectById(userId);
+        if (user == null) throw new BusinessException(ResultCode.NOT_FOUND);
+
+        AdminUserDetailVO vo = new AdminUserDetailVO();
+        vo.setId(user.getId());
+        vo.setUsername(user.getUsername());
+        vo.setName(user.getName());
+        vo.setPhone(user.getPhone());
+        vo.setEmail(user.getEmail());
+        vo.setAvatar(user.getAvatar());
+        vo.setGender(user.getGender());
+        vo.setRole(user.getRole());
+        vo.setCreateTime(user.getCreateTime());
+
+        if (user.getRole() == RoleEnum.STUDENT.getCode()) {
+            Student student = studentMapper.selectById(userId);
+            if (student != null) {
+                AdminUserDetailVO.StudentInfo studentInfo = new AdminUserDetailVO.StudentInfo();
+                studentInfo.setDeptId(student.getDeptId());
+                studentInfo.setMajorId(student.getMajorId());
+                studentInfo.setClazzId(student.getClazzId());
+                studentInfo.setPosition(student.getPosition());
+                studentInfo.setEntryDate(student.getEntryDate());
+                studentInfo.setDeptName(deptMapper.selectById(student.getDeptId()).getName());
+                studentInfo.setMajorName(majorMapper.selectById(student.getMajorId()).getName());
+                studentInfo.setClazzName(clazzMapper.selectById(student.getClazzId()).getName());
+                vo.setStudentInfo(studentInfo);
+            }
+        } else if (user.getRole() == RoleEnum.TEACHER.getCode()) {
+            Teacher teacher = teacherMapper.selectById(userId);
+            if (teacher != null) {
+                AdminUserDetailVO.TeacherInfo teacherInfo = new AdminUserDetailVO.TeacherInfo();
+                teacherInfo.setDeptId(teacher.getDeptId());
+                teacherInfo.setTitle(teacher.getTitle());
+                teacherInfo.setEntryDate(teacher.getEntryDate());
+                teacherInfo.setDeptName(deptMapper.selectById(teacher.getDeptId()).getName());
+                vo.setTeacherInfo(teacherInfo);
+            }
+        }
+
+        return vo;
     }
 }
