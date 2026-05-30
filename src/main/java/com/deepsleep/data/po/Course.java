@@ -4,12 +4,10 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.deepsleep.data.enums.CourseStatus;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
 @Data
-@NoArgsConstructor
 public class Course {
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;

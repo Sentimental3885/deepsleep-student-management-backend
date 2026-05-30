@@ -1,22 +1,23 @@
 package com.deepsleep.service;
 
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.deepsleep.data.enums.SelectionStatus;
-import com.deepsleep.data.po.CourseSelection;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.deepsleep.data.dto.EndCourseDTO;
+import com.deepsleep.data.dto.SelectionDTO;
+import com.deepsleep.data.dto.SelectionQueryDTO;
+import com.deepsleep.data.vo.CourseVO;
 import com.deepsleep.data.vo.Result;
-
-import java.util.List;
+import com.deepsleep.data.vo.SelectionVO;
 
 public interface SelectionService {
-    Result<Void> pickCourse(Long sid, Long cid);
+    Result<IPage<CourseVO>> showAvailableList(Long sid, SelectionQueryDTO dto);
 
-    Result<Void> dropCourse(Long sid, Long cid);
+    Result<Void> pickCourse(Long sid, SelectionDTO dto);
 
-    Result<Void> endCourse(Long sid, Long cid, Double score, Long tid);
+    Result<Void> dropCourse(Long sid, SelectionDTO dto);
 
-    Result<Page<CourseSelection>> showList(Long sid, long current, long size, List<SelectionStatus> statuses);
+    Result<Void> endCourse(Long tid, EndCourseDTO dto);
 
-    Result<Page<CourseSelection>> showList(Long sid, long current, long size);
+    Result<IPage<SelectionVO>> showSelectedList(Long sid, SelectionQueryDTO dto);
 
     Long currentSize(Long cid);
 

@@ -1,34 +1,41 @@
 package com.deepsleep.service.Impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.deepsleep.data.dto.EndCourseDTO;
+import com.deepsleep.data.dto.SelectionDTO;
+import com.deepsleep.data.dto.SelectionQueryDTO;
 import com.deepsleep.data.enums.CourseStatus;
 import com.deepsleep.data.enums.ResultCode;
 import com.deepsleep.data.enums.SelectionStatus;
-import com.deepsleep.data.po.Course;
-import com.deepsleep.data.po.CourseSelection;
+import com.deepsleep.data.po.*;
+import com.deepsleep.data.vo.CourseVO;
 import com.deepsleep.data.vo.Result;
+import com.deepsleep.data.vo.SelectionVO;
 import com.deepsleep.exception.BusinessException;
-import com.deepsleep.mapper.CourseMapper;
-import com.deepsleep.mapper.CourseSelectionMapper;
-import com.deepsleep.mapper.StudentMapper;
+import com.deepsleep.mapper.*;
 import com.deepsleep.service.SelectionService;
 import jakarta.annotation.Resource;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+import java.time.LocalDateTime;
 
 @Service
 public class SelectionServiceImpl implements SelectionService {
 
     @Resource
-    private CourseSelectionMapper selectionMapper;
-
-    @Resource
     private CourseMapper courseMapper;
 
     @Resource
+    private CourseSelectionMapper selectionMapper;
+
+    @Resource
     private StudentMapper studentMapper;
+
+    @Resource
+    private UserMapper userMapper;
 
     //根据课序号查询现有人数
     @Override
@@ -72,15 +79,44 @@ public class SelectionServiceImpl implements SelectionService {
         }
     }
 
+    //获取对应班级的课程列表
+    @Override
+    public Result<IPage<CourseVO>> showAvailableList(Long sid, SelectionQueryDTO dto) {
+        Student student = studentMapper.selectById(sid);
+        if (student == null) {
+            throw new BusinessException(ResultCode.STUDENT_NOT_FOUND);
+        }
+        LambdaQueryWrapper<Course> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(Course::getStatus, CourseStatus.ON)
+                .exists("SELECT 1 FROM course_clazz cc WHERE cc.course_id = course.id " +
+                        "AND cc.clazz_id = {0}", student.getClazzId())
+                //排除已选/已结业课程
+                .notExists("SELECT 1 FROM course_selection cs WHERE cs.student_id = {0} " +
+                        "AND course.id = cs.course_id AND cs.status != {1}",
+                        sid, SelectionStatus.DROPPED);
+        Page<Course> page = new Page<>(dto.getCurrent(), dto.getSize());
+        return Result.success(
+                courseMapper.selectPage(page, wrapper).convert(po -> {
+                    CourseVO vo = new CourseVO();
+                    //拷贝同名字段
+                    BeanUtils.copyProperties(po, vo);
+                    User teacher = userMapper.selectById(po.getTeacherId());
+                    vo.setTeacherName(teacher.getName());
+                    vo.setSize(currentSize(po.getId()));
+                    return vo;})
+        );
+    }
+
     //选课
     @Override
-    public Result<Void> pickCourse(Long sid, Long cid) {
+    public Result<Void> pickCourse(Long sid, SelectionDTO dto) {
         verifyStudent(sid);
-        verifyCourse(cid);
-        CourseSelection selection = getSelection(sid, cid);
+        verifyCourse(dto.getCid());
+        CourseSelection selection = getSelection(sid, dto.getCid());
         if (selection == null) {
             selectionMapper.insert(new CourseSelection(
-                    sid, cid, null, SelectionStatus.PICKED
+                    null, sid, dto.getCid(), null, SelectionStatus.PICKED,
+                    LocalDateTime.now(), LocalDateTime.now()
             ));
             return Result.success();
         } else {
@@ -98,9 +134,9 @@ public class SelectionServiceImpl implements SelectionService {
 
     //退课
     @Override
-    public Result<Void> dropCourse(Long sid, Long cid) {
-        //似乎不用单独verify Student和Course了
-        CourseSelection selection = getSelection(sid, cid);
+    public Result<Void> dropCourse(Long sid, SelectionDTO dto) {
+        //不用单独验证Student和Course了，会被SELECTION_NOT_FOUND一并验证
+        CourseSelection selection = getSelection(sid, dto.getCid());
         if (selection == null) {
             return Result.error(ResultCode.SELECTION_NOT_FOUND);
         } else {
@@ -110,6 +146,7 @@ public class SelectionServiceImpl implements SelectionService {
                 return Result.error(ResultCode.COURSE_ALREADY_OVER);
             } else {
                 selection.setStatus(SelectionStatus.DROPPED);
+                selection.setUpdateTime(LocalDateTime.now());
                 selectionMapper.updateById(selection);
                 return Result.success();
             }
@@ -118,42 +155,52 @@ public class SelectionServiceImpl implements SelectionService {
 
     //结课，或修改成绩
     @Override
-    public Result<Void> endCourse(Long sid, Long cid, Double score, Long tid) {
-        verifyCourse(cid);
-        verifyTeacher(cid, tid);
-        CourseSelection selection = getSelection(sid, cid);
+    public Result<Void> endCourse(Long tid, EndCourseDTO dto) {
+        verifyCourse(dto.getCid());
+        verifyTeacher(dto.getCid(), tid);
+        CourseSelection selection = getSelection(dto.getSid(), dto.getCid());
         if (selection == null) {
             return Result.error(ResultCode.SELECTION_NOT_FOUND);
         } else if(selection.getStatus() == SelectionStatus.DROPPED) {
             return Result.error(ResultCode.COURSE_ALREADY_DROPPED);
-        } else if(score<0 || score>100){
-            return Result.error(ResultCode.INVALID_SCORE);
         } else {
+            double score = dto.getScore();
+            if (score > 100 || score < 0) {
+                return Result.error(ResultCode.INVALID_SCORE);
+            }
+            //对分数根据指定精度四舍五入
+            double precision = 1e-2;
+            double roundedScore = (double)Math.round(score/precision) * precision;
+            if (roundedScore != score) {
+                return Result.error(ResultCode.INVALID_SCORE);
+            }
             selection.setStatus(SelectionStatus.OVER);
             selection.setScore(score);
+            selection.setUpdateTime(LocalDateTime.now());
             selectionMapper.updateById(selection);
             return Result.success();
         }
     }
 
-    //确认选课列表（使用MybatisPlus内置分页）
+    //确认选课列表
     @Override
-    public Result<Page<CourseSelection>> showList(Long sid, long current, long size, List<SelectionStatus> statuses) {
+    public Result<IPage<SelectionVO>> showSelectedList(Long sid, SelectionQueryDTO dto) {
         LambdaQueryWrapper<CourseSelection> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(CourseSelection::getStudentId, sid);
-        wrapper.in(CourseSelection::getStatus, statuses);
-        Page<CourseSelection> page = new Page<>(current, size);
-        selectionMapper.selectPage(page, wrapper);
-        return Result.success(page);
-    }
-
-    //无筛选条件重载
-    @Override
-    public Result<Page<CourseSelection>> showList(Long sid, long current, long size) {
-        LambdaQueryWrapper<CourseSelection> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(CourseSelection::getStudentId, sid);
-        Page<CourseSelection> page = new Page<>(current, size);
-        selectionMapper.selectPage(page, wrapper);
-        return Result.success(page);
+        Page<CourseSelection> page = new Page<>(dto.getCurrent(), dto.getSize());
+        return Result.success(
+                selectionMapper.selectPage(page, wrapper).convert(selection -> {
+                    SelectionVO vo = new SelectionVO();
+                    Course course = courseMapper.selectById(selection.getCourseId());
+                    BeanUtils.copyProperties(course, vo);
+                    User teacher = userMapper.selectById(course.getTeacherId());
+                    vo.setCourseStatus(course.getStatus());
+                    vo.setTeacherName(teacher.getName());
+                    vo.setSize(currentSize(course.getId()));
+                    vo.setSelectionStatus(selection.getStatus());
+                    vo.setScore(selection.getScore());
+                    return vo;
+                })
+        );
     }
 }
