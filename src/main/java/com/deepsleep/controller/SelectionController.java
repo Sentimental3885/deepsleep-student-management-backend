@@ -7,16 +7,16 @@ import com.deepsleep.data.dto.EndCourseDTO;
 import com.deepsleep.data.dto.SelectionDTO;
 import com.deepsleep.data.dto.SelectionQueryDTO;
 import com.deepsleep.data.enums.RoleEnum;
+import com.deepsleep.data.vo.CourseStudentVO;
 import com.deepsleep.data.vo.CourseVO;
 import com.deepsleep.data.vo.Result;
 import com.deepsleep.data.vo.SelectionVO;
 import com.deepsleep.service.SelectionService;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/selection")
@@ -75,5 +75,15 @@ public class SelectionController {
     @PostMapping("/selectionList")
     public Result<IPage<SelectionVO>> showSelectionList(@RequestBody @Valid SelectionQueryDTO dto) {
         return selectionService.showSelectedList(UserContext.getUserId(), dto);
+    }
+
+    /**
+     * 教师查询某课程的学生列表
+     * @param cid 课程ID
+     */
+    @RequireRole(RoleEnum.TEACHER)
+    @PostMapping("/courseStudents/{cid}")
+    public Result<List<CourseStudentVO>> showCourseStudents(@PathVariable Long cid) {
+        return selectionService.showCourseStudents(UserContext.getUserId(), cid);
     }
 }

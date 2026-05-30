@@ -4,9 +4,12 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.deepsleep.data.dto.EndCourseDTO;
 import com.deepsleep.data.dto.SelectionDTO;
 import com.deepsleep.data.dto.SelectionQueryDTO;
+import com.deepsleep.data.vo.CourseStudentVO;
 import com.deepsleep.data.vo.CourseVO;
 import com.deepsleep.data.vo.Result;
 import com.deepsleep.data.vo.SelectionVO;
+
+import java.util.List;
 
 public interface SelectionService {
     Result<IPage<CourseVO>> showAvailableList(Long sid, SelectionQueryDTO dto);
@@ -21,4 +24,5 @@ public interface SelectionService {
 
     Long currentSize(Long cid);
 
+    Result<List<CourseStudentVO>> showCourseStudents(Long tid, Long cid);
 }

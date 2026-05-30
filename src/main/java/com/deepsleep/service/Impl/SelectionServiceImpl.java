@@ -10,6 +10,7 @@ import com.deepsleep.data.enums.CourseStatus;
 import com.deepsleep.data.enums.ResultCode;
 import com.deepsleep.data.enums.SelectionStatus;
 import com.deepsleep.data.po.*;
+import com.deepsleep.data.vo.CourseStudentVO;
 import com.deepsleep.data.vo.CourseVO;
 import com.deepsleep.data.vo.Result;
 import com.deepsleep.data.vo.SelectionVO;
@@ -21,6 +22,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 public class SelectionServiceImpl implements SelectionService {
@@ -43,6 +45,34 @@ public class SelectionServiceImpl implements SelectionService {
         LambdaQueryWrapper<CourseSelection> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(CourseSelection::getCourseId, cid);
         return selectionMapper.selectCount(wrapper);
+    }
+
+    @Override
+    public Result<List<CourseStudentVO>> showCourseStudents(Long tid, Long cid) {
+        Course course = courseMapper.selectById(cid);
+        if (course == null) {
+            return Result.error(ResultCode.COURSE_NOT_FOUND);
+        }
+
+        verifyTeacher(cid,tid);
+
+        LambdaQueryWrapper<CourseSelection> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(CourseSelection::getCourseId, cid)
+                .ne(CourseSelection::getStatus, SelectionStatus.DROPPED);
+
+        List<CourseSelection> selections = selectionMapper.selectList(wrapper);
+        List<CourseStudentVO> list = selections.stream().map(selection -> {
+            CourseStudentVO vo = new CourseStudentVO();
+            User student = userMapper.selectById(selection.getStudentId());
+            vo.setStudentId(selection.getStudentId());
+            vo.setStudentName(student.getName());
+            vo.setUsername(student.getUsername());
+            vo.setScore(selection.getScore());
+            vo.setSelectionStatus(selection.getStatus());
+            return vo;
+        }).toList();
+
+        return Result.success(list);
     }
 
     //验证课程状态
