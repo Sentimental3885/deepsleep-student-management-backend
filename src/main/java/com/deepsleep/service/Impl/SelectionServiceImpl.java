@@ -130,6 +130,7 @@ public class SelectionServiceImpl implements SelectionService {
                     CourseVO vo = new CourseVO();
                     //拷贝同名字段
                     BeanUtils.copyProperties(po, vo);
+                    vo.setStatus(po.getStatus().getValue());
                     User teacher = userMapper.selectById(po.getTeacherId());
                     vo.setTeacherName(teacher.getName());
                     vo.setSize(currentSize(po.getId()));
@@ -224,10 +225,10 @@ public class SelectionServiceImpl implements SelectionService {
                     Course course = courseMapper.selectById(selection.getCourseId());
                     BeanUtils.copyProperties(course, vo);
                     User teacher = userMapper.selectById(course.getTeacherId());
-                    vo.setCourseStatus(course.getStatus());
+                    vo.setCourseStatus(course.getStatus().getValue());
                     vo.setTeacherName(teacher.getName());
                     vo.setSize(currentSize(course.getId()));
-                    vo.setSelectionStatus(selection.getStatus());
+                    vo.setSelectionStatus(selection.getStatus().getValue());
                     vo.setScore(selection.getScore());
                     return vo;
                 })

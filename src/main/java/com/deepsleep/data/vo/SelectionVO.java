@@ -1,7 +1,5 @@
 package com.deepsleep.data.vo;
 
-import com.deepsleep.data.enums.CourseStatus;
-import com.deepsleep.data.enums.SelectionStatus;
 import lombok.Data;
 
 @Data
@@ -15,7 +13,7 @@ public class SelectionVO {
     private Long size;
     private String semester;
     private Double credit;
-    private CourseStatus courseStatus;
-    private SelectionStatus selectionStatus;
+    private Integer courseStatus;
+    private Integer selectionStatus;
     private Double score;
 }

@@ -34,8 +34,14 @@ public enum ResultCode {
     COURSE_ALREADY_PICKED(2102, "课程已被选", HttpStatus.CONFLICT),
     COURSE_ALREADY_DROPPED(2103, "课程已退选", HttpStatus.CONFLICT),
     COURSE_ALREADY_OVER(2104, "课程已修完", HttpStatus.CONFLICT),
-    TEACHER_UNAUTHORIZED(2200, "教师无权结课", HttpStatus.UNAUTHORIZED),
+    TEACHER_UNAUTHORIZED(2200, "非授课教师无权更改", HttpStatus.UNAUTHORIZED),
     INVALID_SCORE(2201, "分数非法", HttpStatus.BAD_REQUEST),
+
+    TEACHER_NOT_FOUND(3000, "教师不存在", HttpStatus.NOT_FOUND),
+    CLAZZ_NOT_FOUND(3001, "班级不存在", HttpStatus.NOT_FOUND),
+    COURSE_ALREADY_EXIST(3002, "课程已存在", HttpStatus.CONFLICT),
+    INVALID_COURSE_STATUS(3003, "课程状态码非法", HttpStatus.BAD_REQUEST),
+    CAPACITY_NOT_ENOUGH(3004,"所设容量过小", HttpStatus.CONFLICT),
 
     FILE_UPLOAD_FAILED(7000, "文件上传失败", HttpStatus.INTERNAL_SERVER_ERROR),
     FILE_DELETE_FAILED(7001, "文件删除失败", HttpStatus.INTERNAL_SERVER_ERROR),

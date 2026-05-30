@@ -3,10 +3,12 @@ package com.deepsleep.data.po;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.deepsleep.data.enums.CourseStatus;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 
 import java.time.LocalDateTime;
 
+@AllArgsConstructor
 @Data
 public class Course {
     @TableId(value = "id", type = IdType.AUTO)

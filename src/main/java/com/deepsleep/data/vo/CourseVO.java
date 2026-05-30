@@ -1,6 +1,5 @@
 package com.deepsleep.data.vo;
 
-import com.deepsleep.data.enums.CourseStatus;
 import lombok.Data;
 
 @Data
@@ -14,6 +13,6 @@ public class CourseVO {
     private Long size;
     private String semester;
     private Double credit;
-    private CourseStatus status;
+    private Integer status;
     private String introduction;
 }
