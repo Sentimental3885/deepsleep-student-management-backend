@@ -21,6 +21,7 @@ spring:
           starttls:
             enable: true
             required: true
+
 # MyBatis 配置
 mybatis-plus:
   mapper-locations: classpath:mapper/*.xml
@@ -42,4 +43,13 @@ jwt:
 
 server:
   port: 22224
+
+aliyun:
+  oss:
+    access-key-id: ${OSS_ACCESS_KEY_ID}
+    access-key-secret: ${OSS_ACCESS_KEY_SECRET}
+    region: cn-hongkong
+    endpoint: http://dssm.sentiexception.com
+    bucket: deepsleep-student-management-oss
+    presigned-url-expire-seconds: 3600
 

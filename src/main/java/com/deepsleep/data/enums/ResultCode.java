@@ -36,6 +36,10 @@ public enum ResultCode {
     COURSE_ALREADY_OVER(2104, "课程已修完", HttpStatus.CONFLICT),
     TEACHER_UNAUTHORIZED(2200, "教师无权结课", HttpStatus.UNAUTHORIZED),
     INVALID_SCORE(2201, "分数非法", HttpStatus.BAD_REQUEST),
+
+    FILE_UPLOAD_FAILED(7000, "文件上传失败", HttpStatus.INTERNAL_SERVER_ERROR),
+    FILE_DELETE_FAILED(7001, "文件删除失败", HttpStatus.INTERNAL_SERVER_ERROR),
+    UPLOAD_SIZE_TOO_LARGE(7002, "请求/请求文件体积过大", HttpStatus.BAD_REQUEST)
     ;
 
     private final Integer code;
