@@ -4,7 +4,9 @@ package com.deepsleep.service.Impl;
 import com.deepsleep.context.UserContext;
 import com.deepsleep.data.dto.UpdateStudentDTO;
 import com.deepsleep.data.po.Student;
+import com.deepsleep.data.po.User;
 import com.deepsleep.data.vo.StudentProfileVO;
+import com.deepsleep.file.storage.FileStorage;
 import com.deepsleep.mapper.*;
 import com.deepsleep.service.StudentService;
 import jakarta.annotation.Resource;
@@ -22,6 +24,10 @@ public class StudentServiceImpl implements StudentService {
     private MajorMapper majorMapper;
     @Resource
     private ClazzMapper clazzMapper;
+    @Resource
+    private UserMapper userMapper;
+    @Resource
+    private FileStorage fileStorage;
 
 
 
@@ -29,7 +35,11 @@ public class StudentServiceImpl implements StudentService {
     public StudentProfileVO getStudentProfile() {
         Long userId = UserContext.getUserId();
         Student student = studentMapper.selectById(userId);
+        User user = userMapper.selectById(userId);
         StudentProfileVO vo = new StudentProfileVO();
+        if (user != null) {
+            vo.setAvatar(fileStorage.getUrl(user.getAvatar()));
+        }
         vo.setDeptId(student.getDeptId());
         vo.setMajorId(student.getMajorId());
         vo.setClazzId(student.getClazzId());

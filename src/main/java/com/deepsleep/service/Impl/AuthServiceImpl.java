@@ -6,6 +6,7 @@ import com.deepsleep.data.enums.ResultCode;
 import com.deepsleep.data.po.User;
 import com.deepsleep.data.vo.LoginVO;
 import com.deepsleep.exception.BusinessException;
+import com.deepsleep.file.storage.FileStorage;
 import com.deepsleep.mapper.UserMapper;
 import com.deepsleep.service.AuthService;
 import com.deepsleep.util.JwtUtil;
@@ -23,6 +24,7 @@ public class AuthServiceImpl implements AuthService {
     private final UserMapper userMapper;
     private final JwtUtil jwtUtil;
     private final RedisUtil redisUtil;
+    private final FileStorage fileStorage;
 
     @Override
     public LoginVO login(LoginDTO dto) {
@@ -39,7 +41,7 @@ public class AuthServiceImpl implements AuthService {
 
         String token = jwtUtil.generateToken(user.getId(), user.getRole());
 
-        return new LoginVO(token,user.getName(),user.getRole());
+        return new LoginVO(token, user.getName(), fileStorage.getUrl(user.getAvatar()), user.getRole());
 
     }
 

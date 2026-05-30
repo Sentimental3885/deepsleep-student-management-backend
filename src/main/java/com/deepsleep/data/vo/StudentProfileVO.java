@@ -6,6 +6,7 @@ import java.time.LocalDate;
 
 @Data
 public class StudentProfileVO {
+    private String avatar;
     private Long deptId;
     private String deptName;
     private Long majorId;

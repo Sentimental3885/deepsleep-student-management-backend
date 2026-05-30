@@ -7,6 +7,7 @@ import lombok.Data;
 public class CourseStudentVO {
     private Long studentId;
     private String studentName;
+    private String studentAvatar;
     private String username;// 学号
     private Double score;
     private SelectionStatus selectionStatus;

@@ -9,6 +9,7 @@ import com.deepsleep.data.po.Notice;
 import com.deepsleep.data.po.User;
 import com.deepsleep.data.vo.NoticeVO;
 import com.deepsleep.exception.BusinessException;
+import com.deepsleep.file.storage.FileStorage;
 import com.deepsleep.mapper.NoticeMapper;
 import com.deepsleep.mapper.UserMapper;
 import com.deepsleep.service.NoticeService;
@@ -22,6 +23,7 @@ import java.util.List;
 public class NoticeServiceImpl implements NoticeService {
     private final NoticeMapper noticeMapper;
     private final UserMapper userMapper;
+    private final FileStorage fileStorage;
 
     @Override
     public void publish(NoticeDTO dto) {
@@ -75,6 +77,7 @@ public class NoticeServiceImpl implements NoticeService {
             User publisher = userMapper.selectById(notice.getPublisherId());
             if (publisher != null) {
                 vo.setPublisherName(publisher.getName());
+                vo.setPublisherAvatar(fileStorage.getUrl(publisher.getAvatar()));
             }
             return vo;
         }).toList();
@@ -99,6 +102,7 @@ public class NoticeServiceImpl implements NoticeService {
         User publisher = userMapper.selectById(notice.getPublisherId());
         if (publisher != null) {
             vo.setPublisherName(publisher.getName());
+            vo.setPublisherAvatar(fileStorage.getUrl(publisher.getAvatar()));
         }
         return vo;
     }

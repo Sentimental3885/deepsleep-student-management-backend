@@ -11,6 +11,7 @@ import com.deepsleep.data.po.User;
 import com.deepsleep.data.vo.AdminUserDetailVO;
 import com.deepsleep.data.vo.AdminUserVO;
 import com.deepsleep.exception.BusinessException;
+import com.deepsleep.file.storage.FileStorage;
 import com.deepsleep.mapper.*;
 import com.deepsleep.service.AdminService;
 import lombok.RequiredArgsConstructor;
@@ -31,6 +32,7 @@ public class AdminServiceImpl implements AdminService {
     private final DeptMapper deptMapper;
     private final MajorMapper majorMapper;
     private final ClazzMapper clazzMapper;
+    private final FileStorage fileStorage;
 
 
     //根据学生信息自动创建user和student条目
@@ -144,6 +146,7 @@ public class AdminServiceImpl implements AdminService {
             vo.setId(user.getId());
             vo.setUsername(user.getUsername());
             vo.setName(user.getName());
+            vo.setAvatar(fileStorage.getUrl(user.getAvatar()));
             vo.setPhone(user.getPhone());
             vo.setEmail(user.getEmail());
             vo.setGender(user.getGender());
@@ -167,7 +170,7 @@ public class AdminServiceImpl implements AdminService {
         vo.setName(user.getName());
         vo.setPhone(user.getPhone());
         vo.setEmail(user.getEmail());
-        vo.setAvatar(user.getAvatar());
+        vo.setAvatar(fileStorage.getUrl(user.getAvatar()));
         vo.setGender(user.getGender());
         vo.setRole(user.getRole());
         vo.setCreateTime(user.getCreateTime());

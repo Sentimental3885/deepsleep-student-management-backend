@@ -15,6 +15,7 @@ import com.deepsleep.data.vo.CourseVO;
 import com.deepsleep.data.vo.Result;
 import com.deepsleep.data.vo.SelectionVO;
 import com.deepsleep.exception.BusinessException;
+import com.deepsleep.file.storage.FileStorage;
 import com.deepsleep.mapper.*;
 import com.deepsleep.service.SelectionService;
 import jakarta.annotation.Resource;
@@ -38,6 +39,9 @@ public class SelectionServiceImpl implements SelectionService {
 
     @Resource
     private UserMapper userMapper;
+
+    @Resource
+    private FileStorage fileStorage;
 
     //根据课序号查询现有人数
     @Override
@@ -66,6 +70,7 @@ public class SelectionServiceImpl implements SelectionService {
             User student = userMapper.selectById(selection.getStudentId());
             vo.setStudentId(selection.getStudentId());
             vo.setStudentName(student.getName());
+            vo.setStudentAvatar(fileStorage.getUrl(student.getAvatar()));
             vo.setUsername(student.getUsername());
             vo.setScore(selection.getScore());
             vo.setSelectionStatus(selection.getStatus());
@@ -132,6 +137,7 @@ public class SelectionServiceImpl implements SelectionService {
                     BeanUtils.copyProperties(po, vo);
                     User teacher = userMapper.selectById(po.getTeacherId());
                     vo.setTeacherName(teacher.getName());
+                    vo.setTeacherAvatar(fileStorage.getUrl(teacher.getAvatar()));
                     vo.setSize(currentSize(po.getId()));
                     return vo;})
         );
@@ -226,6 +232,7 @@ public class SelectionServiceImpl implements SelectionService {
                     User teacher = userMapper.selectById(course.getTeacherId());
                     vo.setCourseStatus(course.getStatus());
                     vo.setTeacherName(teacher.getName());
+                    vo.setTeacherAvatar(fileStorage.getUrl(teacher.getAvatar()));
                     vo.setSize(currentSize(course.getId()));
                     vo.setSelectionStatus(selection.getStatus());
                     vo.setScore(selection.getScore());

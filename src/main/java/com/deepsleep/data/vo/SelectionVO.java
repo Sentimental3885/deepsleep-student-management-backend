@@ -10,6 +10,7 @@ public class SelectionVO {
     private String name;
     private Long teacherId;
     private String teacherName;
+    private String teacherAvatar;
     private String code;
     private Long capacity;
     private Long size;

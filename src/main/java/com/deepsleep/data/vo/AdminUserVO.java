@@ -12,6 +12,7 @@ public class AdminUserVO {
     private Long id;
     private String username;
     private String name;
+    private String avatar;
     private String phone;
     private String email;
     private Integer gender;

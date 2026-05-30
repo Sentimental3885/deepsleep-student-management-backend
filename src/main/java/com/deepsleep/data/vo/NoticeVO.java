@@ -11,6 +11,7 @@ public class NoticeVO {
     private String content;
     private Long publisherId;
     private String publisherName;
+    private String publisherAvatar;
     private LocalDateTime createTime;
     private LocalDateTime updateTime;
 }
