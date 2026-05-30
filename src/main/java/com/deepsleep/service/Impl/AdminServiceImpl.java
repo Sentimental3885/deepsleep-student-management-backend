@@ -2,9 +2,7 @@ package com.deepsleep.service.Impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.deepsleep.data.dto.AddStudentDTO;
-import com.deepsleep.data.dto.AddTeacherDTO;
-import com.deepsleep.data.dto.UserQueryDTO;
+import com.deepsleep.data.dto.*;
 import com.deepsleep.data.enums.ResultCode;
 import com.deepsleep.data.enums.RoleEnum;
 import com.deepsleep.data.po.Student;
@@ -201,5 +199,64 @@ public class AdminServiceImpl implements AdminService {
         }
 
         return vo;
+    }
+
+    @Override
+    public void updateUser(Long userId, AdminUpdateUserDTO dto) {
+        User user = userMapper.selectById(userId);
+        if(user==null) throw new BusinessException(ResultCode.NOT_FOUND);
+
+        if(dto.getPhone()!=null){
+            Long count = userMapper.selectCount(new LambdaQueryWrapper<User>()
+                    .eq(User::getPhone,dto.getPhone())
+                    .ne(User::getId,userId));
+            if(count>0) throw new BusinessException(ResultCode.PHONE_CONFLICTED);
+        }
+
+        if (dto.getEmail()!=null) {
+            Long count = userMapper.selectCount(
+                    new LambdaQueryWrapper<User>()
+                            .eq(User::getEmail, dto.getEmail())
+                            .ne(User::getId, userId)
+            );
+            if (count>0) throw new BusinessException(ResultCode.EMAIL_CONFLICT);
+        }
+
+        User update = new User();
+        update.setId(userId);
+        update.setName(dto.getName());
+        update.setGender(dto.getGender());
+        update.setPhone(dto.getPhone());
+        update.setEmail(dto.getEmail());
+        userMapper.updateById(update);
+    }
+
+
+    @Override
+    public void updateStudent(Long userId, AdminUpdateStudentDTO dto) {
+        Student student = studentMapper.selectById(userId);
+        if (student==null) throw new BusinessException(ResultCode.NOT_FOUND);
+
+        Student update = new Student();
+        update.setUserId(userId);
+        update.setDeptId(dto.getDeptId());
+        update.setMajorId(dto.getMajorId());
+        update.setClazzId(dto.getClazzId());
+        update.setPosition(dto.getPosition());
+        update.setEntryDate(dto.getEntryDate());
+        studentMapper.updateById(update);
+    }
+
+    @Override
+    public void updateTeacher(Long userId, AdminUpdateTeacherDTO dto) {
+        Teacher teacher = teacherMapper.selectById(userId);
+        if (teacher==null) throw new BusinessException(ResultCode.NOT_FOUND);
+
+        Teacher update = new Teacher();
+        update.setUserId(userId);
+        update.setDeptId(dto.getDeptId());
+        update.setTitle(dto.getTitle());
+        update.setEntryDate(dto.getEntryDate());
+        teacherMapper.updateById(update);
     }
 }

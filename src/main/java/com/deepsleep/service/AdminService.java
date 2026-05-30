@@ -1,9 +1,7 @@
 package com.deepsleep.service;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.deepsleep.data.dto.AddStudentDTO;
-import com.deepsleep.data.dto.AddTeacherDTO;
-import com.deepsleep.data.dto.UserQueryDTO;
+import com.deepsleep.data.dto.*;
 import com.deepsleep.data.vo.AdminUserDetailVO;
 import com.deepsleep.data.vo.AdminUserVO;
 
@@ -15,4 +13,7 @@ public interface AdminService {
     void deleteUser(Long userId);
     Page<AdminUserVO> getUserList(UserQueryDTO dto);
     AdminUserDetailVO getUserDetail(Long userId);
+    void updateUser(Long userId, AdminUpdateUserDTO dto);
+    void updateStudent(Long userId, AdminUpdateStudentDTO dto);
+    void updateTeacher(Long userId, AdminUpdateTeacherDTO dto);
 }
