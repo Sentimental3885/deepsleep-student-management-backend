@@ -115,8 +115,13 @@ public class UserServiceImpl implements UserService {
     @Override
     public AvatarUpdateVO updateAvatar(MultipartFile avatar) {
 
+        if (avatar == null || avatar.isEmpty()) {
+            throw new BusinessException(ResultCode.FILE_EMPTY);
+        }
+
         LegalAvatarType avatarType = validate(avatar);
-        String objectKey = generateImageKey(UserContext.getUserId(), avatarType);
+        Long userId = UserContext.getUserId();
+        String objectKey = generateImageKey(userId, avatarType);
 
         try (InputStream inputStream = avatar.getInputStream()) {
 
@@ -133,7 +138,13 @@ public class UserServiceImpl implements UserService {
             throw new BusinessException(ResultCode.FILE_UPLOAD_FAILED);
         }
 
+        int updated = userMapper.updateAvatarById(userId, objectKey);
+        if (updated <= 0) {
+            fileStorage.deleteQuietly(objectKey);
+            throw new BusinessException(ResultCode.FILE_UPLOAD_FAILED);
+        }
         String avatarUrl = fileStorage.getUrl(objectKey);
+
         return new AvatarUpdateVO(objectKey, avatarUrl);
     }
 

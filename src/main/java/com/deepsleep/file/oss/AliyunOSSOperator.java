@@ -22,12 +22,13 @@ public class AliyunOSSOperator {
     private final OSSClient ossClient;
     private final AliyunOSSProperties ossProperties;
 
-    public void upload(String objectKey, InputStream inputStream) {
+    public void upload(String objectKey, InputStream inputStream, String contentType) {
         try {
             PutObjectRequest putObjectRequest = PutObjectRequest.newBuilder()
                     .bucket(ossProperties.bucket())
                     .key(objectKey)
                     .body(BinaryData.fromStream(inputStream))
+                    .contentType(contentType)
                     .build();
 
             PutObjectResult result = ossClient.putObject(putObjectRequest);

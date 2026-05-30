@@ -13,7 +13,7 @@ public class AliyunOSSFileStorage implements FileStorage {
 
     @Override
     public void storage(UploadFile uploadFile) {
-        aliyunOSSOperator.upload(uploadFile.objectKey(), uploadFile.inputStream());
+        aliyunOSSOperator.upload(uploadFile.objectKey(), uploadFile.inputStream(), uploadFile.contentType());
     }
 
     @Override

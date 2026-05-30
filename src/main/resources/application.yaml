@@ -22,6 +22,11 @@ spring:
             enable: true
             required: true
 
+  servlet:
+    multipart:
+      max-file-size: 7MB
+      max-request-size: 15MB
+
 # MyBatis 配置
 mybatis-plus:
   mapper-locations: classpath:mapper/*.xml

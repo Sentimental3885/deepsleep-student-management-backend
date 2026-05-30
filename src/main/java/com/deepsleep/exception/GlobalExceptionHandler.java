@@ -4,6 +4,7 @@ import com.deepsleep.data.enums.ResultCode;
 import com.deepsleep.data.vo.Result;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,6 +12,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
 @RestControllerAdvice
 @Slf4j
@@ -25,6 +27,26 @@ public class GlobalExceptionHandler {
         log.warn("业务异常：code={},msg={}",e.getResultCode().getCode(),e.getMsg());
         return ResponseEntity.status(e.getResultCode().getHttpStatus())
                 .body(Result.error(e.getResultCode(),e.getMsg()));
+    }
+
+    /**
+     * 处理上传超限异常
+     */
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public <T> ResponseEntity<Result<T>> handleMaxUploadSizeExceededException(
+            MaxUploadSizeExceededException ex,
+            HttpServletRequest request
+    ) {
+        log.warn(
+                "上传超限 | 路径：{} {}",
+                request.getMethod(),
+                request.getRequestURI()
+        );
+        return ResponseEntity
+                .status(ResultCode.UPLOAD_SIZE_TOO_LARGE.getHttpStatus())
+                .body(
+                        Result.error(ResultCode.UPLOAD_SIZE_TOO_LARGE)
+                );
     }
 
     /**
