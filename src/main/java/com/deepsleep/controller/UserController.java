@@ -4,11 +4,13 @@ import com.deepsleep.annotation.RequireLogin;
 import com.deepsleep.data.dto.UpdateEmailDTO;
 import com.deepsleep.data.dto.UpdatePasswordDTO;
 import com.deepsleep.data.dto.UpdatePhoneDTO;
+import com.deepsleep.data.vo.AvatarUpdateVO;
 import com.deepsleep.data.vo.Result;
 import com.deepsleep.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequiredArgsConstructor
@@ -48,6 +50,15 @@ public class UserController {
     public Result<Void> updatePassword(@RequestBody @Valid UpdatePasswordDTO dto) {
         userService.updatePassword(dto);
         return Result.success();
+    }
+
+    /**
+     * 更新头像
+     */
+    @RequireLogin
+    @PutMapping("/avatar")
+    public Result<AvatarUpdateVO> updateAvatar(@RequestParam("avatar") MultipartFile avatar) {
+        return Result.success(userService.updateAvatar(avatar));
     }
 
 }

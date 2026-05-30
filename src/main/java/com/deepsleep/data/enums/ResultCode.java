@@ -39,7 +39,10 @@ public enum ResultCode {
 
     FILE_UPLOAD_FAILED(7000, "文件上传失败", HttpStatus.INTERNAL_SERVER_ERROR),
     FILE_DELETE_FAILED(7001, "文件删除失败", HttpStatus.INTERNAL_SERVER_ERROR),
-    UPLOAD_SIZE_TOO_LARGE(7002, "请求/请求文件体积过大", HttpStatus.BAD_REQUEST)
+    FILE_EMPTY(7002, "文件为空", HttpStatus.BAD_REQUEST),
+    FILE_TYPE_NOT_SUPPORT(7003, "文件格式不支持", HttpStatus.BAD_REQUEST),
+    UPLOAD_SIZE_TOO_LARGE(7004, "请求/请求文件体积过大", HttpStatus.BAD_REQUEST),
+
     ;
 
     private final Integer code;
