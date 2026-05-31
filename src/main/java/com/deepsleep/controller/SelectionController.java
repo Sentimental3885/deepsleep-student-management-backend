@@ -4,7 +4,6 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.deepsleep.annotation.RequireRole;
 import com.deepsleep.context.UserContext;
 import com.deepsleep.data.dto.EndCourseDTO;
-import com.deepsleep.data.dto.SelectionDTO;
 import com.deepsleep.data.dto.SelectionQueryDTO;
 import com.deepsleep.data.enums.RoleEnum;
 import com.deepsleep.data.vo.CourseStudentVO;
@@ -27,33 +26,34 @@ public class SelectionController {
 
     /**
      * 获取可选课程列表
-     * @param dto 查询参数
+     * @param dto 查询参数，支持null和仅传部分参数
      * @return 分页课程列表
      */
     @RequireRole(RoleEnum.STUDENT)
-    @PostMapping("/courseList")
-    public Result<IPage<CourseVO>> showCourseList(@RequestBody @Valid SelectionQueryDTO dto) {
+    @GetMapping("/courseList")
+    public Result<IPage<CourseVO>> showCourseList(@Valid SelectionQueryDTO dto) {
+        dto.setDefaultValue();
         return selectionService.showAvailableList(UserContext.getUserId(), dto);
     }
 
     /**
      * 选课
-     * @param dto 仅含课程id
+     * @param cid 课程id
      */
     @RequireRole(RoleEnum.STUDENT)
-    @PostMapping("/pick")
-    public Result<Void> pickCourse(@RequestBody @Valid SelectionDTO dto){
-        return selectionService.pickCourse(UserContext.getUserId(), dto);
+    @PostMapping("/pick/{cid}")
+    public Result<Void> pickCourse(@PathVariable Long cid){
+        return selectionService.pickCourse(UserContext.getUserId(), cid);
     }
 
     /**
      * 退课
-     * @param dto 仅含课程id
+     * @param cid 课程id
      */
     @RequireRole(RoleEnum.STUDENT)
-    @PostMapping("/drop")
-    public Result<Void> dropCourse(@RequestBody @Valid SelectionDTO dto){
-        return selectionService.dropCourse(UserContext.getUserId(), dto);
+    @DeleteMapping("/drop/{cid}")
+    public Result<Void> dropCourse(@PathVariable Long cid){
+        return selectionService.dropCourse(UserContext.getUserId(), cid);
     }
 
     /**
@@ -61,19 +61,20 @@ public class SelectionController {
      * @param dto 结课信息
      */
     @RequireRole(RoleEnum.TEACHER)
-    @PostMapping("/end")
+    @PutMapping("/end")
     public Result<Void> endCourse(@RequestBody @Valid EndCourseDTO dto){
         return selectionService.endCourse(UserContext.getUserId(), dto);
     }
 
     /**
      * 查询已选课程
-     * @param dto 查询参数
+     * @param dto 查询参数，支持null和仅传部分参数
      * @return 课程选择列表
      */
     @RequireRole(RoleEnum.STUDENT)
-    @PostMapping("/selectionList")
-    public Result<IPage<SelectionVO>> showSelectionList(@RequestBody @Valid SelectionQueryDTO dto) {
+    @GetMapping("/selectionList")
+    public Result<IPage<SelectionVO>> showSelectionList(@Valid SelectionQueryDTO dto) {
+        dto.setDefaultValue();
         return selectionService.showSelectedList(UserContext.getUserId(), dto);
     }
 
