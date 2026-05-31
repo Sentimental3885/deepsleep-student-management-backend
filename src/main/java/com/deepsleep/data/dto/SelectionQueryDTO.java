@@ -5,8 +5,8 @@ import lombok.Data;
 
 @Data
 public class SelectionQueryDTO {
-    private static final int DEFAULT_PAGE_NUM = 1;
-    private static final int DEFAULT_PAGE_SIZE = 10;
+    public static final int DEFAULT_PAGE_NUM = 1;
+    public static final int DEFAULT_PAGE_SIZE = 10;
 
     @Min(value = 1)
     private Integer pageNum;

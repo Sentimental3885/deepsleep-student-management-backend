@@ -4,12 +4,13 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.deepsleep.annotation.RequireRole;
 import com.deepsleep.context.UserContext;
 import com.deepsleep.data.dto.EndCourseDTO;
+import com.deepsleep.data.dto.ScoreQueryDTO;
 import com.deepsleep.data.dto.SelectionQueryDTO;
 import com.deepsleep.data.enums.RoleEnum;
 import com.deepsleep.data.vo.CourseStudentVO;
 import com.deepsleep.data.vo.CourseVO;
 import com.deepsleep.data.vo.Result;
-import com.deepsleep.data.vo.SelectionVO;
+import com.deepsleep.data.vo.ScoreVO;
 import com.deepsleep.service.SelectionService;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
@@ -73,7 +74,7 @@ public class SelectionController {
      */
     @RequireRole(RoleEnum.STUDENT)
     @GetMapping("/selectionList")
-    public Result<IPage<SelectionVO>> showSelectionList(@Valid SelectionQueryDTO dto) {
+    public Result<IPage<CourseVO>> showSelectionList(@Valid SelectionQueryDTO dto) {
         dto.setDefaultValue();
         return selectionService.showSelectedList(UserContext.getUserId(), dto);
     }
@@ -86,5 +87,24 @@ public class SelectionController {
     @PostMapping("/courseStudents/{cid}")
     public Result<List<CourseStudentVO>> showCourseStudents(@PathVariable Long cid) {
         return selectionService.showCourseStudents(UserContext.getUserId(), cid);
+    }
+
+
+    /**
+     * 学生查询成绩
+     * @param dto 学期+分页参数
+     * @return 分页的成绩单
+     */
+    @RequireRole(RoleEnum.STUDENT)
+    @GetMapping("/score/list")
+    public Result<IPage<ScoreVO>> showScoreList(@Valid ScoreQueryDTO dto) {
+        dto.setDefaultValue();
+        return selectionService.showScoreList(UserContext.getUserId(), dto);
+    }
+
+    @RequireRole(RoleEnum.STUDENT)
+    @GetMapping("/score/{cid}")
+    public Result<ScoreVO> showScore(@PathVariable Long cid) {
+        return selectionService.getScoreDetail(UserContext.getUserId(), cid);
     }
 }

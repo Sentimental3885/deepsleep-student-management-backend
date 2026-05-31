@@ -4,15 +4,14 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.deepsleep.data.dto.EndCourseDTO;
+import com.deepsleep.data.dto.ScoreDetailDTO;
+import com.deepsleep.data.dto.ScoreQueryDTO;
 import com.deepsleep.data.dto.SelectionQueryDTO;
 import com.deepsleep.data.enums.CourseStatus;
 import com.deepsleep.data.enums.ResultCode;
 import com.deepsleep.data.enums.SelectionStatus;
 import com.deepsleep.data.po.*;
-import com.deepsleep.data.vo.CourseStudentVO;
-import com.deepsleep.data.vo.CourseVO;
-import com.deepsleep.data.vo.Result;
-import com.deepsleep.data.vo.SelectionVO;
+import com.deepsleep.data.vo.*;
 import com.deepsleep.exception.BusinessException;
 import com.deepsleep.mapper.*;
 import com.deepsleep.service.SelectionService;
@@ -21,7 +20,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.List;
+import java.util.*;
 
 @Service
 public class SelectionServiceImpl implements SelectionService {
@@ -124,7 +123,8 @@ public class SelectionServiceImpl implements SelectionService {
                 //排除已选/已结业课程
                 .notExists("SELECT 1 FROM course_selection cs WHERE cs.student_id = {0} " +
                         "AND course.id = cs.course_id AND cs.status != {1}",
-                        sid, SelectionStatus.DROPPED);
+                        sid, SelectionStatus.DROPPED)
+                .orderByAsc(Course::getId);
         Page<Course> page = new Page<>(dto.getPageNum(), dto.getPageSize());
         return Result.success(
                 courseMapper.selectPage(page, wrapper).convert(po -> {
@@ -215,25 +215,82 @@ public class SelectionServiceImpl implements SelectionService {
         }
     }
 
+    //提取出转换方法，便于复用
+    private CourseVO selectionToCourseVO(CourseSelection selection) {
+        CourseVO vo = new CourseVO();
+        Course course = courseMapper.selectById(selection.getCourseId());
+        BeanUtils.copyProperties(course, vo);
+        User teacher = userMapper.selectById(course.getTeacherId());
+        vo.setTeacherName(teacher.getName());
+        vo.setSize(currentSize(course.getId()));
+        return vo;
+    }
+    private ScoreVO selectionToScoreVO(CourseSelection selection) {
+        ScoreVO vo = new ScoreVO();
+        BeanUtils.copyProperties(selectionToCourseVO(selection), vo);
+        vo.setScore(selection.getScore());
+        vo.setGPA(Math.max(0.0, (double) Math.round(selection.getScore() - 50) / 10));
+        BeanUtils.copyProperties(getScoreInfo(selection.getScore(),selection.getCourseId()), vo);
+        return vo;
+    }
+
     //确认选课列表
     @Override
-    public Result<IPage<SelectionVO>> showSelectedList(Long sid, SelectionQueryDTO dto) {
+    public Result<IPage<CourseVO>> showSelectedList(Long sid, SelectionQueryDTO dto) {
+        verifyStudent(sid);
         LambdaQueryWrapper<CourseSelection> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(CourseSelection::getStudentId, sid).eq(CourseSelection::getStatus, SelectionStatus.PICKED);
+        wrapper.eq(CourseSelection::getStudentId, sid).eq(CourseSelection::getStatus, SelectionStatus.PICKED)
+                .orderByAsc(CourseSelection::getCourseId);
+        Page<CourseSelection> page = new Page<>(dto.getPageNum(), dto.getPageSize());
+        return Result.success(selectionMapper.selectPage(page, wrapper).convert(this::selectionToCourseVO));
+    }
+
+    //获取更多成绩相关的统计信息
+    private ScoreDetailDTO getScoreInfo(Double score, Long cid) {
+        LambdaQueryWrapper<CourseSelection> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(CourseSelection::getCourseId, cid)
+                .eq(CourseSelection::getStatus, SelectionStatus.OVER);
+        List<CourseSelection> originalList = selectionMapper.selectList(wrapper);
+        List<Double> list = new ArrayList<>();
+        for (CourseSelection selection : originalList) {
+            list.add(selection.getScore());
+        }
+        list.sort(Comparator.reverseOrder());
+        List<Double> distinctList = new ArrayList<>(new HashSet<>(list));
+        distinctList.sort(Comparator.reverseOrder());
+        return new ScoreDetailDTO(
+                list.getFirst(), list.getLast(), list.size(),
+                list.indexOf(score)+1, distinctList.indexOf(score)+1
+        );
+    }
+
+    //查看结业成绩
+    @Override
+    public Result<IPage<ScoreVO>> showScoreList(Long sid, ScoreQueryDTO dto) {
+        verifyStudent(sid);
+        LambdaQueryWrapper<CourseSelection> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(CourseSelection::getStudentId, sid).eq(CourseSelection::getStatus, SelectionStatus.OVER)
+                .exists("SELECT 1 FROM course c WHERE c.id = course_selection.course_id " +
+                        "AND c.semester = {0}", dto.getSemester())
+                .orderByAsc(CourseSelection::getCourseId);
         Page<CourseSelection> page = new Page<>(dto.getPageNum(), dto.getPageSize());
         return Result.success(
-                selectionMapper.selectPage(page, wrapper).convert(selection -> {
-                    SelectionVO vo = new SelectionVO();
-                    Course course = courseMapper.selectById(selection.getCourseId());
-                    BeanUtils.copyProperties(course, vo);
-                    User teacher = userMapper.selectById(course.getTeacherId());
-                    vo.setCourseStatus(course.getStatus().getValue());
-                    vo.setTeacherName(teacher.getName());
-                    vo.setSize(currentSize(course.getId()));
-                    vo.setSelectionStatus(selection.getStatus().getValue());
-                    vo.setScore(selection.getScore());
-                    return vo;
-                })
+                selectionMapper.selectPage(page, wrapper).convert(this::selectionToScoreVO)
         );
+    }
+
+    @Override
+    public Result<ScoreVO> getScoreDetail(Long sid, Long cid) {
+        verifyStudent(sid);
+        verifyCourse(cid, true, true);
+        LambdaQueryWrapper<CourseSelection> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(CourseSelection::getStudentId, sid).eq(CourseSelection::getCourseId, cid);
+        CourseSelection selection = selectionMapper.selectOne(wrapper);
+        if (selection == null) {
+            throw new BusinessException(ResultCode.SELECTION_NOT_FOUND);
+        } else if (selection.getScore() == null) {
+            throw new BusinessException(ResultCode.SCORE_UNAVAILABLE);
+        }
+        return Result.success(selectionToScoreVO(selection));
     }
 }

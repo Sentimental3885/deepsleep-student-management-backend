@@ -36,6 +36,7 @@ public enum ResultCode {
     COURSE_ALREADY_OVER(2104, "课程已修完", HttpStatus.CONFLICT),
     TEACHER_UNAUTHORIZED(2200, "非授课教师无权更改", HttpStatus.UNAUTHORIZED),
     INVALID_SCORE(2201, "分数非法", HttpStatus.BAD_REQUEST),
+    SCORE_UNAVAILABLE(2202, "成绩未公布", HttpStatus.CONFLICT),
 
     TEACHER_NOT_FOUND(3000, "教师不存在", HttpStatus.NOT_FOUND),
     CLAZZ_NOT_FOUND(3001, "班级不存在", HttpStatus.NOT_FOUND),
