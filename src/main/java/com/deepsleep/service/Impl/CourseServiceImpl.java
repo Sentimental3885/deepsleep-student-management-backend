@@ -2,15 +2,14 @@ package com.deepsleep.service.Impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.deepsleep.data.dto.AddCourseDTO;
+import com.deepsleep.data.dto.ScheduleDTO;
 import com.deepsleep.data.dto.UpdateCourseDTO;
 import com.deepsleep.data.enums.CourseStatus;
 import com.deepsleep.data.enums.ResultCode;
-import com.deepsleep.data.po.Course;
-import com.deepsleep.data.po.CourseClazz;
-import com.deepsleep.data.po.CourseSelection;
-import com.deepsleep.data.po.User;
+import com.deepsleep.data.po.*;
 import com.deepsleep.data.vo.CourseVO;
 import com.deepsleep.data.vo.Result;
+import com.deepsleep.data.vo.ScheduleVO;
 import com.deepsleep.exception.BusinessException;
 import com.deepsleep.file.storage.FileStorage;
 import com.deepsleep.mapper.*;
@@ -23,6 +22,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Objects;
 
 @Service
 public class CourseServiceImpl implements CourseService {
@@ -51,7 +52,13 @@ public class CourseServiceImpl implements CourseService {
     @Resource
     private CourseSelectionMapper selectionMapper;
 
-    //添加课程
+    @Resource
+    private CourseScheduleMapper scheduleMapper;
+
+    @Resource
+    private ClassroomMapper classroomMapper;
+
+    //添加课程，暂不加排课
     @Transactional
     @Override
     public Result<Void> addCourse(AddCourseDTO dto) {
@@ -107,6 +114,7 @@ public class CourseServiceImpl implements CourseService {
         courseMapper.deleteById(cid);
         ccMapper.delete(new LambdaQueryWrapper<CourseClazz>().eq(CourseClazz::getCourseId,cid));
         selectionMapper.delete(new LambdaQueryWrapper<CourseSelection>().eq(CourseSelection::getCourseId,cid));
+        scheduleMapper.delete(new LambdaQueryWrapper<CourseSchedule>().eq(CourseSchedule::getCourseId,cid));
         return Result.success();
     }
 
@@ -127,9 +135,103 @@ public class CourseServiceImpl implements CourseService {
         return Result.success();
     }
 
+    @Override
+    public Result<List<ScheduleVO>> getScheduleByCourse(Long cid) {
+        if (courseMapper.selectById(cid) == null) {
+            throw new BusinessException(ResultCode.COURSE_NOT_FOUND);
+        }
+        List<CourseSchedule> schedules = scheduleMapper.selectList(
+                new LambdaQueryWrapper<CourseSchedule>().eq(CourseSchedule::getCourseId,cid)
+        );
+        return Result.success(schedules.stream().map(schedule -> {
+            ScheduleVO vo = new ScheduleVO();
+            Course course = courseMapper.selectById(schedule.getCourseId());
+            Classroom classroom = classroomMapper.selectById(schedule.getClassroomId());
+            User teacher = userMapper.selectById(course.getTeacherId());
+            vo.setCourseId(course.getId());
+            vo.setCourseName(course.getName());
+            vo.setTeacherName(teacher.getName());
+            vo.setTeacherAvatar(fileStorage.getUrl(teacher.getAvatar()));
+            vo.setWeekday(schedule.getWeekday());
+            vo.setSection(schedule.getSection());
+            vo.setStartWeek(schedule.getStartWeek());
+            vo.setEndWeek(schedule.getEndWeek());
+            vo.setClassroomId(classroom.getId());
+            vo.setClassroomName(classroom.getName());
+            return vo;
+        }).toList());
+    }
+
+    private void verifyClassroom(Long rid) {
+        if (classroomMapper.selectById(rid) == null) {
+            throw new BusinessException(ResultCode.CLASSROOM_NOT_FOUND);
+        }
+    }
+
+    //增加排课
+    @Override
+    public Result<Void> addSchedule(Long cid, ScheduleDTO dto) {
+        //检查新排课是否与表中同时刻同教室的课冲突
+        LambdaQueryWrapper<CourseSchedule> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(CourseSchedule::getWeekday, dto.getWeekday()).eq(CourseSchedule::getSection, dto.getSection())
+                .ge(CourseSchedule::getEndWeek, dto.getStartWeek()).le(CourseSchedule::getStartWeek, dto.getEndWeek())
+                .eq(CourseSchedule::getClassroomId, dto.getRid());
+        if (scheduleMapper.selectCount(wrapper) > 0) {
+            throw new BusinessException(ResultCode.SCHEDULE_CONFLICT);
+        }
+        verifyClassroom(dto.getRid());
+        CourseSchedule schedule = new CourseSchedule(
+                null, cid, dto.getWeekday(), dto.getSection(),
+                dto.getStartWeek(), dto.getEndWeek(), dto.getRid(),
+                LocalDateTime.now(), LocalDateTime.now()
+        );
+        scheduleMapper.insert(schedule);
+        return Result.success();
+    }
+
+    //删除排课
+    @Override
+    public Result<Void> deleteSchedule(Long cid, Long scid) {
+        CourseSchedule schedule = scheduleMapper.selectById(scid);
+        if (schedule == null) {
+            throw new BusinessException(ResultCode.SCHEDULE_NOT_FOUND);
+        } else if (!Objects.equals(schedule.getCourseId(), cid)) {
+            throw new BusinessException(ResultCode.SCHEDULE_COURSE_MISMATCH);
+        }
+        scheduleMapper.deleteById(scid);
+        return Result.success();
+    }
+
+    //更改排课
+    @Override
+    public Result<Void> updateSchedule(Long cid, Long scid, ScheduleDTO dto) {
+        CourseSchedule schedule = scheduleMapper.selectById(scid);
+        if (schedule == null) {
+            throw new BusinessException(ResultCode.SCHEDULE_NOT_FOUND);
+        } else if (!Objects.equals(schedule.getCourseId(), cid)) {
+            throw new BusinessException(ResultCode.SCHEDULE_COURSE_MISMATCH);
+        }
+        verifyClassroom(dto.getRid());
+        LambdaQueryWrapper<CourseSchedule> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(CourseSchedule::getWeekday, dto.getWeekday()).eq(CourseSchedule::getSection, dto.getSection())
+                .ge(CourseSchedule::getEndWeek, dto.getStartWeek()).le(CourseSchedule::getStartWeek, dto.getEndWeek())
+                .eq(CourseSchedule::getClassroomId, dto.getRid()).ne(CourseSchedule::getId, scid);
+        if (scheduleMapper.selectCount(wrapper) > 0) {
+            throw new BusinessException(ResultCode.SCHEDULE_CONFLICT);
+        }
+        BeanUtils.copyProperties(dto, schedule);
+        schedule.setClassroomId(dto.getRid());
+        schedule.setUpdateTime(LocalDateTime.now());
+        scheduleMapper.updateById(schedule);
+        return Result.success();
+    }
+
     //验证教师是否为授课教师
     @Override
     public void verifyTeacher(Long tid, Long cid) {
+        if (courseMapper.selectById(cid) == null) {
+            throw new BusinessException(ResultCode.COURSE_NOT_FOUND);
+        }
         if (!courseMapper.selectById(cid).getTeacherId().equals(tid)) {
             throw new BusinessException(ResultCode.TEACHER_UNAUTHORIZED);
         }

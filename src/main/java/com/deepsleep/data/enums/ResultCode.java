@@ -43,6 +43,9 @@ public enum ResultCode {
     COURSE_ALREADY_EXIST(3002, "课程已存在", HttpStatus.CONFLICT),
     INVALID_COURSE_STATUS(3003, "课程状态码非法", HttpStatus.BAD_REQUEST),
     CAPACITY_NOT_ENOUGH(3004,"所设容量过小", HttpStatus.CONFLICT),
+    SCHEDULE_NOT_FOUND(3100, "课程不存在" , HttpStatus.NOT_FOUND),
+    SCHEDULE_COURSE_MISMATCH(3101, "排课与课程不匹配", HttpStatus.CONFLICT),
+    SCHEDULE_CONFLICT(3102, "排课冲突", HttpStatus.CONFLICT),
 
     CLASSROOM_NOT_FOUND(4000, "教室不存在", HttpStatus.NOT_FOUND),
 
