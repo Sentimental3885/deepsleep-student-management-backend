@@ -3,17 +3,21 @@ package com.deepsleep.data.vo;
 import lombok.Data;
 
 @Data
-public class CourseVO {
+public class ScoreVO {
     private Long id;
     private String name;
-    private Long teacherId;
     private String teacherName;
     private String teacherAvatar;
     private String code;
-    private Long capacity;
-    private Long size;
     private String semester;
     private Double credit;
     private Integer status;
-    private String introduction;
+    private Double score;
+    private Double GPA;
+    private Double maxScore;
+    private Double minScore;
+    private Integer total;
+    private Integer rank;
+    //位次排名
+    private Integer denseRank;
 }

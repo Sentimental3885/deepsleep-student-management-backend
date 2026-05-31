@@ -3,17 +3,13 @@ package com.deepsleep.data.vo;
 import lombok.Data;
 
 @Data
-public class CourseVO {
+public class TeacherCourseVO {
     private Long id;
     private String name;
-    private Long teacherId;
-    private String teacherName;
-    private String teacherAvatar;
     private String code;
-    private Long capacity;
-    private Long size;
     private String semester;
+    private Long capacity;
+    private Long size;//目前选课人数
     private Double credit;
     private Integer status;
-    private String introduction;
 }

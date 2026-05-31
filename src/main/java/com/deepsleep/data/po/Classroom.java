@@ -2,17 +2,17 @@ package com.deepsleep.data.po;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
-import lombok.AllArgsConstructor;
+import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
 import java.time.LocalDateTime;
 
-@AllArgsConstructor
 @Data
-public class CourseClazz {
+@TableName("classroom")
+public class Classroom {
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;
-    private Long courseId;
-    private Long clazzId;
+    private String name;
     private LocalDateTime createTime;
+    private LocalDateTime updateTime;
 }
