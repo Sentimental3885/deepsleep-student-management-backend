@@ -4,7 +4,6 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.deepsleep.data.dto.EndCourseDTO;
-import com.deepsleep.data.dto.SelectionDTO;
 import com.deepsleep.data.dto.SelectionQueryDTO;
 import com.deepsleep.data.enums.CourseStatus;
 import com.deepsleep.data.enums.ResultCode;
@@ -39,6 +38,9 @@ public class SelectionServiceImpl implements SelectionService {
     @Resource
     private UserMapper userMapper;
 
+    @Resource
+    private TeacherMapper teacherMapper;
+
     //根据课序号查询现有人数
     @Override
     public Long currentSize(Long cid) {
@@ -49,11 +51,7 @@ public class SelectionServiceImpl implements SelectionService {
 
     @Override
     public Result<List<CourseStudentVO>> showCourseStudents(Long tid, Long cid) {
-        Course course = courseMapper.selectById(cid);
-        if (course == null) {
-            return Result.error(ResultCode.COURSE_NOT_FOUND);
-        }
-
+        verifyCourse(cid, true, true);
         verifyTeacher(cid,tid);
 
         LambdaQueryWrapper<CourseSelection> wrapper = new LambdaQueryWrapper<>();
@@ -75,14 +73,14 @@ public class SelectionServiceImpl implements SelectionService {
         return Result.success(list);
     }
 
-    //验证课程状态
-    private void verifyCourse(Long cid) {
+    //验证课程状态，boolean参数选择模式
+    private void verifyCourse(Long cid, boolean doAllowOff, boolean doAllowFull) {
         Course course = courseMapper.selectById(cid);
         if (course == null){
             throw new BusinessException(ResultCode.COURSE_NOT_FOUND);
-        } else if (course.getStatus() == CourseStatus.OFF) {
+        } else if (!doAllowOff && course.getStatus() == CourseStatus.OFF) {
             throw new BusinessException(ResultCode.COURSE_UNPICKABLE);
-        } else if (currentSize(cid) >= course.getCapacity()) {
+        } else if (!doAllowFull && currentSize(cid) >= course.getCapacity()) {
             throw new BusinessException(ResultCode.COURSE_FULL);
         }
     }
@@ -104,6 +102,9 @@ public class SelectionServiceImpl implements SelectionService {
 
     //验证教师
     private void verifyTeacher(Long cid, Long tid) {
+        if (teacherMapper.selectById(tid) == null) {
+            throw new BusinessException(ResultCode.TEACHER_NOT_FOUND);
+        }
         if (!courseMapper.selectById(cid).getTeacherId().equals(tid)) {
             throw new BusinessException(ResultCode.TEACHER_UNAUTHORIZED);
         }
@@ -124,7 +125,7 @@ public class SelectionServiceImpl implements SelectionService {
                 .notExists("SELECT 1 FROM course_selection cs WHERE cs.student_id = {0} " +
                         "AND course.id = cs.course_id AND cs.status != {1}",
                         sid, SelectionStatus.DROPPED);
-        Page<Course> page = new Page<>(dto.getCurrent(), dto.getSize());
+        Page<Course> page = new Page<>(dto.getPageNum(), dto.getPageSize());
         return Result.success(
                 courseMapper.selectPage(page, wrapper).convert(po -> {
                     CourseVO vo = new CourseVO();
@@ -140,13 +141,13 @@ public class SelectionServiceImpl implements SelectionService {
 
     //选课
     @Override
-    public Result<Void> pickCourse(Long sid, SelectionDTO dto) {
+    public Result<Void> pickCourse(Long sid, Long cid) {
         verifyStudent(sid);
-        verifyCourse(dto.getCid());
-        CourseSelection selection = getSelection(sid, dto.getCid());
+        verifyCourse(cid, false, false);
+        CourseSelection selection = getSelection(sid, cid);
         if (selection == null) {
             selectionMapper.insert(new CourseSelection(
-                    null, sid, dto.getCid(), null, SelectionStatus.PICKED,
+                    null, sid, cid, null, SelectionStatus.PICKED,
                     LocalDateTime.now(), LocalDateTime.now()
             ));
             return Result.success();
@@ -165,9 +166,10 @@ public class SelectionServiceImpl implements SelectionService {
 
     //退课
     @Override
-    public Result<Void> dropCourse(Long sid, SelectionDTO dto) {
-        //不用单独验证Student和Course了，会被SELECTION_NOT_FOUND一并验证
-        CourseSelection selection = getSelection(sid, dto.getCid());
+    public Result<Void> dropCourse(Long sid, Long cid) {
+        verifyStudent(sid);
+        verifyCourse(cid, false, true);
+        CourseSelection selection = getSelection(sid, cid);
         if (selection == null) {
             return Result.error(ResultCode.SELECTION_NOT_FOUND);
         } else {
@@ -187,7 +189,7 @@ public class SelectionServiceImpl implements SelectionService {
     //结课，或修改成绩
     @Override
     public Result<Void> endCourse(Long tid, EndCourseDTO dto) {
-        verifyCourse(dto.getCid());
+        verifyCourse(dto.getCid(), false, true);
         verifyTeacher(dto.getCid(), tid);
         CourseSelection selection = getSelection(dto.getSid(), dto.getCid());
         if (selection == null) {
@@ -217,8 +219,8 @@ public class SelectionServiceImpl implements SelectionService {
     @Override
     public Result<IPage<SelectionVO>> showSelectedList(Long sid, SelectionQueryDTO dto) {
         LambdaQueryWrapper<CourseSelection> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(CourseSelection::getStudentId, sid);
-        Page<CourseSelection> page = new Page<>(dto.getCurrent(), dto.getSize());
+        wrapper.eq(CourseSelection::getStudentId, sid).eq(CourseSelection::getStatus, SelectionStatus.PICKED);
+        Page<CourseSelection> page = new Page<>(dto.getPageNum(), dto.getPageSize());
         return Result.success(
                 selectionMapper.selectPage(page, wrapper).convert(selection -> {
                     SelectionVO vo = new SelectionVO();
