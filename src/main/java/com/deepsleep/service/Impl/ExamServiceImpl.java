@@ -66,6 +66,13 @@ public class ExamServiceImpl implements ExamService {
                 throw new BusinessException(ResultCode.TEACHER_UNAUTHORIZED);
             }
         }
+        User invigilator = userMapper.selectById(dto.getInvigilatorId());
+        if(invigilator == null || invigilator.getRole() != RoleEnum.TEACHER.getCode()){
+            throw new BusinessException(ResultCode.TEACHER_NOT_FOUND);
+        }
+        if(classroomMapper.selectById(dto.getClassroomId()) == null) {
+            throw new BusinessException(ResultCode.CLASSROOM_NOT_FOUND);
+        }
 
         exam.setType(dto.getType());
         exam.setExamTime(dto.getExamTime());
