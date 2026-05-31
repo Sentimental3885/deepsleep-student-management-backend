@@ -9,9 +9,11 @@ import com.deepsleep.data.enums.RoleEnum;
 import com.deepsleep.data.po.OperationLog;
 import com.deepsleep.data.vo.AdminUserDetailVO;
 import com.deepsleep.data.vo.AdminUserVO;
+import com.deepsleep.data.vo.ExamVO;
 import com.deepsleep.data.vo.Result;
 import com.deepsleep.mapper.OperationLogMapper;
 import com.deepsleep.service.AdminService;
+import com.deepsleep.service.ExamService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -26,6 +28,7 @@ public class AdminController {
 
     private final AdminService adminService;
     private final OperationLogMapper operationLogMapper;
+    private final ExamService examService;
 
     /**
      * 创建学生账号
@@ -137,5 +140,16 @@ public class AdminController {
                         .orderByDesc(OperationLog::getCreateTime)
         );
         return Result.success(page);
+    }
+
+    /**
+     * 管理员查所有考试
+     */
+    @RequireRole(RoleEnum.ADMIN)
+    @GetMapping("/exam/list")
+    public Result<Page<ExamVO>> getAllExams(
+            @RequestParam(defaultValue = "1") int pageNum,
+            @RequestParam(defaultValue = "10") int pageSize) {
+        return Result.success(examService.getAllExams(pageNum, pageSize));
     }
 }

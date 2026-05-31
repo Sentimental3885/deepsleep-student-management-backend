@@ -3,9 +3,11 @@ package com.deepsleep.controller;
 import com.deepsleep.annotation.RequireRole;
 import com.deepsleep.data.dto.UpdateStudentDTO;
 import com.deepsleep.data.enums.RoleEnum;
+import com.deepsleep.data.vo.ExamVO;
 import com.deepsleep.data.vo.Result;
 import com.deepsleep.data.vo.ScheduleVO;
 import com.deepsleep.data.vo.StudentProfileVO;
+import com.deepsleep.service.ExamService;
 import com.deepsleep.service.StudentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -21,6 +23,7 @@ import java.util.List;
 public class StudentController {
 
     private final StudentService studentService;
+    private final ExamService examService;
 
     /**
      * 获取学生个人信息
@@ -48,5 +51,14 @@ public class StudentController {
     @GetMapping("/schedule")
     public Result<List<ScheduleVO>> getMySchedule(){
         return  Result.success(studentService.getMySchedule());
+    }
+
+    /**
+     * 学生获取自己的考试列表
+     */
+    @RequireRole(RoleEnum.STUDENT)
+    @GetMapping("/exams")
+    public Result<List<ExamVO>> getMyExams() {
+        return Result.success(examService.getMyExamsAsStudent());
     }
 }

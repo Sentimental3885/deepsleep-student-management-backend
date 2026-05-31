@@ -43,6 +43,8 @@ public enum ResultCode {
     INVALID_COURSE_STATUS(3003, "课程状态码非法", HttpStatus.BAD_REQUEST),
     CAPACITY_NOT_ENOUGH(3004,"所设容量过小", HttpStatus.CONFLICT),
 
+    CLASSROOM_NOT_FOUND(4000, "教室不存在", HttpStatus.NOT_FOUND),
+
     FILE_UPLOAD_FAILED(7000, "文件上传失败", HttpStatus.INTERNAL_SERVER_ERROR),
     FILE_DELETE_FAILED(7001, "文件删除失败", HttpStatus.INTERNAL_SERVER_ERROR),
     FILE_EMPTY(7002, "文件为空", HttpStatus.BAD_REQUEST),
