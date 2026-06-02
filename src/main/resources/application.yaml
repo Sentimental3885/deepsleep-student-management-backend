@@ -41,6 +41,14 @@ logging:
     com.deepsleep: debug
 
 
+# DeepSeek API配置
+deepseek:
+  api:
+    key: sk-7aae9063c4b6425fa5b4f3ecb7686bb3
+    url: https://api.deepseek.com/v1/chat/completions
+    model: deepseek-chat
+    max-tokens: 4096
+
 #jwt
 jwt:
   secret: deeepsleep2026studentmanagementbackendsecretkey
