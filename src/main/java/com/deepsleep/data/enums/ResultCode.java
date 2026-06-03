@@ -47,10 +47,20 @@ public enum ResultCode {
     SCHEDULE_COURSE_MISMATCH(3101, "排课与课程不匹配", HttpStatus.CONFLICT),
     SCHEDULE_CONFLICT(3102, "排课冲突", HttpStatus.CONFLICT),
 
-    CLASSROOM_NOT_FOUND(4000, "教室不存在", HttpStatus.NOT_FOUND),
 
-    AI_SERVICE_ERROR(5000, "AI服务异常", HttpStatus.INTERNAL_SERVER_ERROR),
-    NO_GRADES_TO_ANALYZE(5001, "暂无成绩可供分析", HttpStatus.BAD_REQUEST),
+    CLASSROOM_NOT_FOUND(4000, "教室不存在", HttpStatus.NOT_FOUND),
+    CLASSROOM_CONFLICT(4001, "教室名称已存在", HttpStatus.CONFLICT),
+    CLASSROOM_HAS_REFERENCES(4002, "教室被排课或考试使用中，无法删除", HttpStatus.BAD_REQUEST),
+
+    DEPT_CONFLICT(5001, "学院名称已存在", HttpStatus.CONFLICT),
+    DEPT_HAS_REFERENCES(5002, "学院下还有专业/学生/教师，无法删除", HttpStatus.BAD_REQUEST),
+    MAJOR_CONFLICT(5003, "该学院下专业名称已存在", HttpStatus.CONFLICT),
+    MAJOR_HAS_REFERENCES(5004, "专业下还有班级/学生，无法删除", HttpStatus.BAD_REQUEST),
+    CLAZZ_CONFLICT(5005, "班级名称已存在", HttpStatus.CONFLICT),
+    CLAZZ_HAS_REFERENCES(5006, "班级下还有学生，无法删除", HttpStatus.BAD_REQUEST),
+
+    AI_SERVICE_ERROR(6000, "AI服务异常", HttpStatus.INTERNAL_SERVER_ERROR),
+    NO_GRADES_TO_ANALYZE(6001, "暂无成绩可供分析", HttpStatus.BAD_REQUEST),
 
     FILE_UPLOAD_FAILED(7000, "文件上传失败", HttpStatus.INTERNAL_SERVER_ERROR),
     FILE_DELETE_FAILED(7001, "文件删除失败", HttpStatus.INTERNAL_SERVER_ERROR),
