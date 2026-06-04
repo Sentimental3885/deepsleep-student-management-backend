@@ -14,8 +14,6 @@ public enum ResultCode {
     FORBIDDEN(403, "权限不足", HttpStatus.FORBIDDEN),
     NOT_FOUND(404, "资源不存在", HttpStatus.NOT_FOUND),
     INTERVAL_SERVER_ERROR(500, "服务器内部错误", HttpStatus.INTERNAL_SERVER_ERROR),
-    CODE_EXPIRED(400, "验证码已过期", HttpStatus.BAD_REQUEST),
-    CODE_ERROR(400, "验证码错误", HttpStatus.BAD_REQUEST),
 
     USER_NOT_FOUND(1004, "用户不存在", HttpStatus.NOT_FOUND),
     PASSWORD_ERROR(1001, "用户名或密码错误", HttpStatus.UNAUTHORIZED),
@@ -61,6 +59,9 @@ public enum ResultCode {
 
     AI_SERVICE_ERROR(6000, "AI服务异常", HttpStatus.INTERNAL_SERVER_ERROR),
     NO_GRADES_TO_ANALYZE(6001, "暂无成绩可供分析", HttpStatus.BAD_REQUEST),
+
+    EMAIL_CODE_EXPIRED(8000, "邮箱验证码不存在或已过期", HttpStatus.BAD_REQUEST),
+    EMAIL_CODE_ERROR(8001, "邮箱验证码错误", HttpStatus.BAD_REQUEST),
 
     FILE_UPLOAD_FAILED(7000, "文件上传失败", HttpStatus.INTERNAL_SERVER_ERROR),
     FILE_DELETE_FAILED(7001, "文件删除失败", HttpStatus.INTERNAL_SERVER_ERROR),

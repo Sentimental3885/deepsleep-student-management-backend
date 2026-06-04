@@ -47,8 +47,8 @@ public class EmailServiceImpl implements EmailService {
         String key = CODE_PREFIX + email;
         Object stored = redisUtil.get(key);
 
-        if(stored==null) throw new BusinessException(ResultCode.CODE_EXPIRED);
-        if(!stored.toString().equals(code)) throw new BusinessException(ResultCode.CODE_ERROR);
+        if(stored==null) throw new BusinessException(ResultCode.EMAIL_CODE_EXPIRED);
+        if(!stored.toString().equals(code)) throw new BusinessException(ResultCode.EMAIL_CODE_ERROR);
 
         redisUtil.delete(key);
     }
