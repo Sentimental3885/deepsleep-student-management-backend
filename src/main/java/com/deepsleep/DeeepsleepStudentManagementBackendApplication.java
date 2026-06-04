@@ -8,7 +8,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @MapperScan("com.deepsleep.mapper")
 public class DeeepsleepStudentManagementBackendApplication {
 
-    static void main(String[] args) {
+    public static void main(String[] args) {
         SpringApplication.run(DeeepsleepStudentManagementBackendApplication.class, args);
     }
 
