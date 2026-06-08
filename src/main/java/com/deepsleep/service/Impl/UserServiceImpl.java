@@ -8,6 +8,7 @@ import com.deepsleep.data.dto.UpdatePhoneDTO;
 import com.deepsleep.data.enums.ResultCode;
 import com.deepsleep.data.po.User;
 import com.deepsleep.data.vo.AvatarUpdateVO;
+import com.deepsleep.data.vo.MyUserInfoVO;
 import com.deepsleep.exception.BusinessException;
 import com.deepsleep.file.model.UploadFile;
 import com.deepsleep.file.storage.FileStorage;
@@ -154,6 +155,25 @@ public class UserServiceImpl implements UserService {
         } catch (IOException e) {
             throw new BusinessException(ResultCode.FILE_UPLOAD_FAILED);
         }
+    }
+
+    @Override
+    public MyUserInfoVO me() {
+        User me = userMapper.selectById(UserContext.getUserId());
+        if (me == null) {
+            throw new BusinessException(ResultCode.USER_NOT_FOUND);
+        }
+        return MyUserInfoVO.builder()
+                .id(me.getId())
+                .username(me.getUsername())
+                .name(me.getName())
+                .avatar(fileStorage.getUrl(me.getAvatar()))
+                .phone(me.getPhone())
+                .email(me.getEmail())
+                .gender(me.getGender())
+                .role(me.getRole())
+                .createTime(me.getCreateTime())
+                .build();
     }
 
 }

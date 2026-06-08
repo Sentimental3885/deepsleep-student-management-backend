@@ -62,7 +62,7 @@ public class CourseController {
     @RequireRole({RoleEnum.ADMIN, RoleEnum.TEACHER})
     @PutMapping("/update/{cid}")
     public Result<Void> updateCourse(@PathVariable Long cid, @RequestBody @Valid UpdateCourseDTO updateCourseDTO){
-        if (RoleEnum.fromCode(UserContext.getRole()) == RoleEnum.TEACHER){
+        if (RoleEnum.fromCode(UserContext.getRole()) == RoleEnum.TEACHER) {
             courseService.verifyTeacher(UserContext.getUserId(), cid);
         }
         return courseService.updateCourse(cid, updateCourseDTO);
@@ -74,7 +74,7 @@ public class CourseController {
      */
     @RequireLogin
     @GetMapping("/schedule/{cid}")
-    public Result<List<ScheduleVO>> getScheduleByCourse(@PathVariable Long cid){
+    public Result<List<ScheduleVO>> getScheduleByCourse(@PathVariable Long cid) {
         return courseService.getScheduleByCourse(cid);
     }
 

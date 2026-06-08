@@ -5,6 +5,7 @@ import com.deepsleep.data.dto.UpdateEmailDTO;
 import com.deepsleep.data.dto.UpdatePasswordDTO;
 import com.deepsleep.data.dto.UpdatePhoneDTO;
 import com.deepsleep.data.vo.AvatarUpdateVO;
+import com.deepsleep.data.vo.MyUserInfoVO;
 import com.deepsleep.data.vo.Result;
 import com.deepsleep.service.UserService;
 import jakarta.validation.Valid;
@@ -18,6 +19,11 @@ import org.springframework.web.multipart.MultipartFile;
 public class UserController {
     private final UserService userService;
 
+    @RequireLogin
+    @GetMapping("/me")
+    public Result<MyUserInfoVO> me() {
+        return Result.success(userService.me());
+    }
 
     /**
      * 更换邮箱

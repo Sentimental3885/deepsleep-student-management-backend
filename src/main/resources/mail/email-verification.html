@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${model.subject}">邮箱验证码</title>
+</head>
+<body style="margin:0;padding:0;background:#e9e9e9;color:#001530;font-family:Arial,'Microsoft YaHei',sans-serif;">
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background:#e9e9e9;margin:0;padding:0;">
+    <tr>
+        <td align="center" style="padding:48px 16px 24px;">
+            <table role="presentation" width="650" cellspacing="0" cellpadding="0" border="0" style="width:650px;max-width:100%;border-collapse:collapse;">
+                <tr>
+                    <td align="center" style="padding:0 0 30px;">
+                        <div style="display:inline-block;font-size:0;line-height:0;vertical-align:middle;">
+                            <span style="display:inline-block;width:46px;height:46px;border-radius:50%;background:linear-gradient(135deg,#0787ff 0%,#7b42ff 72%);vertical-align:middle;"></span>
+                            <span style="display:inline-block;margin-left:10px;color:#001a70;font-size:26px;line-height:46px;font-weight:700;vertical-align:middle;">
+                                DeepSleep学生管理系统
+                            </span>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="height:5px;background:#1e82ee;font-size:0;line-height:0;">&nbsp;</td>
+                </tr>
+                <tr>
+                    <td style="background:#ffffff;padding:34px 30px 38px;">
+                        <h1 style="margin:0 0 32px;color:#182b43;font-size:24px;line-height:1.4;font-weight:700;" th:text="${model.title}">
+                            DeepSleep学生管理系统 新邮箱验证码
+                        </h1>
+
+                        <p style="margin:0 0 22px;font-size:14px;line-height:1.8;">
+                            亲爱的
+                            <a th:href="'mailto:' + ${model.email}" th:text="${model.email}" style="color:#006dff;text-decoration:underline;">user@example.com</a>，
+                        </p>
+
+                        <p style="margin:0 0 22px;font-size:14px;line-height:1.8;">
+                            你正在将该邮箱绑定到
+                            <span>DeepSleep学生管理系统</span>
+                            账号。
+                        </p>
+
+                        <p style="margin:0 0 22px;font-size:14px;line-height:1.8;">
+                            为了完成邮箱改绑，请在页面中输入以下验证码：
+                        </p>
+
+                        <div style="padding:8px 0 26px;text-align:center;color:#1a73e8;font-size:38px;line-height:1.2;font-weight:700;letter-spacing:12px;" th:text="${model.code}">
+                            381341
+                        </div>
+
+                        <p style="margin:0 0 18px;font-size:14px;line-height:1.8;">
+                            该验证码有效期为
+                            <strong th:text="${model.expireMinutes}">5</strong>
+                            分钟，请尽快完成验证。
+                        </p>
+
+                        <p style="margin:0 0 22px;font-size:14px;line-height:1.8;">
+                            操作时间：
+                            <span th:text="${model.operationTime}">2026-06-05 13:43:00</span>
+                        </p>
+
+                        <p style="margin:0 0 54px;font-size:14px;line-height:1.8;">
+                            你收到这封邮件，是因为有人正在尝试把该邮箱设置为
+                            <span>DeepSleep学生管理系统</span>
+                            账号的新邮箱。如果这不是你本人操作，请忽略本邮件。
+                        </p>
+
+                        <p style="margin:0 0 10px;font-size:14px;line-height:1.8;">
+                            温馨提示：这是一封系统自动发送的邮件，
+                            <strong>请勿直接回复。</strong>
+                        </p>
+
+                        <p style="margin:0 0 14px;font-size:14px;line-height:1.8;">
+                            邮箱改绑过程中遇到问题？
+                            <a href="https://example.com" style="color:#006dff;text-decoration:underline;">请点击此处</a>
+                            联系我们的支持团队。
+                        </p>
+
+                        <p style="margin:0 0 8px;font-size:14px;line-height:1.8;">感谢你的支持</p>
+                        <p style="margin:0;font-size:14px;line-height:1.8;">
+                            <span>DeepSleep团队</span>
+                        </p>
+                    </td>
+                </tr>
+                <tr>
+                    <td align="center" style="background:#f7f7f7;padding:28px 24px;color:#001530;font-size:13px;line-height:1.7;">
+                        Copyright ©
+                        <span th:text="${model.currentYear}">2026</span>
+                        <span>DeepSleep学生管理系统</span>.
+                        All rights reserved.
+                    </td>
+                </tr>
+                <tr>
+                    <td align="center" style="padding:20px 16px 0;font-size:13px;line-height:1.8;">
+                        <a href="https://example.com" style="color:#006dff;text-decoration:none;">关于 DeepSleep学生管理系统</a>
+                        <span style="color:#006dff;"> | </span>
+                        <a href="https://example.com" style="color:#006dff;text-decoration:none;">隐私政策</a>
+                        <span style="color:#006dff;"> | </span>
+                        <a href="https://example.com" style="color:#006dff;text-decoration:none;">服务条款</a>
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>
+</body>
+</html>
