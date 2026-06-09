@@ -9,7 +9,7 @@ import com.deepsleep.data.po.Notice;
 import com.deepsleep.data.po.User;
 import com.deepsleep.data.vo.NoticeVO;
 import com.deepsleep.exception.BusinessException;
-import com.deepsleep.file.storage.FileStorage;
+import com.deepsleep.infrastructure.file.storage.FileStorage;
 import com.deepsleep.mapper.NoticeMapper;
 import com.deepsleep.mapper.UserMapper;
 import com.deepsleep.service.NoticeService;

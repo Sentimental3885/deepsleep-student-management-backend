@@ -60,7 +60,9 @@ public enum ResultCode {
     AI_SERVICE_ERROR(6000, "AI服务异常", HttpStatus.INTERNAL_SERVER_ERROR),
     NO_GRADES_TO_ANALYZE(6001, "暂无成绩可供分析", HttpStatus.BAD_REQUEST),
 
+    @Deprecated
     EMAIL_CODE_EXPIRED(8000, "邮箱验证码不存在或已过期", HttpStatus.BAD_REQUEST),
+    @Deprecated
     EMAIL_CODE_ERROR(8001, "邮箱验证码错误", HttpStatus.BAD_REQUEST),
     EMAIL_SEND_FAILED(8003, "构建/发送HTML邮件失败", HttpStatus.INTERNAL_SERVER_ERROR),
 
@@ -70,6 +72,11 @@ public enum ResultCode {
     FILE_TYPE_NOT_SUPPORT(7003, "文件格式不支持", HttpStatus.BAD_REQUEST),
     UPLOAD_SIZE_TOO_LARGE(7004, "请求/请求文件体积过大", HttpStatus.BAD_REQUEST),
 
+    // 验证码校验相关验证码
+    CODE_NOT_EXISTS(9000, "还未对目标发送验证码", HttpStatus.NOT_FOUND),
+    CODE_SEND_TOO_FREQUENTLY(9001, "对同一目标的验证码发送过于频繁", HttpStatus.BAD_REQUEST),
+    CODE_INCORRECT(9002, "验证码错误", HttpStatus.BAD_REQUEST),
+    CODE_FAILED_ATTEMPTS_TOO_MUCH(9003, "验证码校验失败次数过多", HttpStatus.BAD_REQUEST),
     ;
 
     private final Integer code;

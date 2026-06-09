@@ -11,7 +11,7 @@ import com.deepsleep.data.vo.CourseVO;
 import com.deepsleep.data.vo.Result;
 import com.deepsleep.data.vo.ScheduleVO;
 import com.deepsleep.exception.BusinessException;
-import com.deepsleep.file.storage.FileStorage;
+import com.deepsleep.infrastructure.file.storage.FileStorage;
 import com.deepsleep.mapper.*;
 import com.deepsleep.service.CourseService;
 import com.deepsleep.service.SelectionService;

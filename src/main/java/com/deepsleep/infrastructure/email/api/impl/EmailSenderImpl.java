@@ -1,21 +1,23 @@
-package com.deepsleep.email.api.impl;
+package com.deepsleep.infrastructure.email.api.impl;
 
 
 import com.deepsleep.config.EmailProperties;
 import com.deepsleep.data.enums.ResultCode;
-import com.deepsleep.email.api.EmailSender;
-import com.deepsleep.email.model.HtmlEmailMessage;
 import com.deepsleep.exception.BusinessException;
+import com.deepsleep.infrastructure.email.api.EmailSender;
+import com.deepsleep.infrastructure.email.model.HtmlEmailMessage;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.mail.MailException;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.stereotype.Component;
 
 import java.nio.charset.StandardCharsets;
 import java.util.regex.Pattern;
 
+@Component
 @RequiredArgsConstructor
 public class EmailSenderImpl implements EmailSender {
 

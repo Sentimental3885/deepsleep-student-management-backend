@@ -8,7 +8,7 @@ import com.deepsleep.data.po.Teacher;
 import com.deepsleep.data.po.User;
 import com.deepsleep.data.vo.TeacherCourseVO;
 import com.deepsleep.data.vo.TeacherProfileVO;
-import com.deepsleep.file.storage.FileStorage;
+import com.deepsleep.infrastructure.file.storage.FileStorage;
 import com.deepsleep.mapper.CourseMapper;
 import com.deepsleep.mapper.DeptMapper;
 import com.deepsleep.mapper.TeacherMapper;

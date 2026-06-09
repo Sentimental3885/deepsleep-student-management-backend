@@ -1,4 +1,4 @@
-package com.deepsleep.file.model;
+package com.deepsleep.infrastructure.file.model;
 
 import lombok.Builder;
 import lombok.NonNull;

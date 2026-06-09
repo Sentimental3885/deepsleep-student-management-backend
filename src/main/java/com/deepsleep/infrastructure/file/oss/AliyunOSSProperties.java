@@ -1,4 +1,4 @@
-package com.deepsleep.file.oss;
+package com.deepsleep.infrastructure.file.oss;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 

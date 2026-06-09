@@ -11,7 +11,7 @@ import com.deepsleep.data.po.User;
 import com.deepsleep.data.vo.AdminUserDetailVO;
 import com.deepsleep.data.vo.AdminUserVO;
 import com.deepsleep.exception.BusinessException;
-import com.deepsleep.file.storage.FileStorage;
+import com.deepsleep.infrastructure.file.storage.FileStorage;
 import com.deepsleep.mapper.*;
 import com.deepsleep.service.AdminService;
 import lombok.RequiredArgsConstructor;

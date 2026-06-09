@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.deepsleep.data.po.User;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
 
 @Mapper
@@ -14,4 +15,7 @@ public interface UserMapper extends BaseMapper<User> {
             @Param("userId") Long userId,
             @Param("avatarKey") String avatarKey
     );
+
+    @Select("select u.email from user u where id = #{userId}")
+    String selectEmailById(Long userId);
 }

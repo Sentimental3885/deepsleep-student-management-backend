@@ -6,7 +6,7 @@ import com.deepsleep.data.enums.ResultCode;
 import com.deepsleep.data.po.User;
 import com.deepsleep.data.vo.LoginVO;
 import com.deepsleep.exception.BusinessException;
-import com.deepsleep.file.storage.FileStorage;
+import com.deepsleep.infrastructure.file.storage.FileStorage;
 import com.deepsleep.mapper.UserMapper;
 import com.deepsleep.service.AuthService;
 import com.deepsleep.util.JwtUtil;

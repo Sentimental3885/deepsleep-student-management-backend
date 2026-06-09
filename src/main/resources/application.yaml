@@ -26,6 +26,8 @@ spring:
     multipart:
       max-file-size: 7MB
       max-request-size: 15MB
+  thymeleaf:
+    prefix: classpath:/mail/
 
 # MyBatis 配置
 mybatis-plus:
@@ -42,12 +44,23 @@ logging:
 
 
 # DeepSeek API配置
-deepseek:
-  api:
+dssm:
+  ai:
     key: ${DEEPSEEK_API_KEY}
     url: https://api.deepseek.com/v1/chat/completions
     model: deepseek-chat
     max-tokens: 4096
+
+  code:
+    enabled: true
+    sms-provider: aliyun
+    interval-lock-expire-seconds: 60
+    code-expire-seconds: 300
+    max-fail-number: 5
+    target-hash-secret: ${EMAIL_HASH_SECRET}
+
+  email:
+    from: ${spring.mail.username}
 
 #jwt
 jwt:
@@ -65,4 +78,3 @@ aliyun:
     endpoint: http://dssm.sentiexception.com
     bucket: deepsleep-student-management-oss
     presigned-url-expire-seconds: 3600
-

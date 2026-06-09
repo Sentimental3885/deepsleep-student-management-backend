@@ -1,7 +1,7 @@
-package com.deepsleep.file.storage;
+package com.deepsleep.infrastructure.file.storage;
 
 
-import com.deepsleep.file.model.UploadFile;
+import com.deepsleep.infrastructure.file.model.UploadFile;
 
 public interface FileStorage {
 

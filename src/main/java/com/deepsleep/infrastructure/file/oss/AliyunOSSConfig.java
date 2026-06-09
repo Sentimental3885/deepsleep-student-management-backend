@@ -1,4 +1,4 @@
-package com.deepsleep.file.oss;
+package com.deepsleep.infrastructure.file.oss;
 
 import com.aliyun.sdk.service.oss2.OSSClient;
 import com.aliyun.sdk.service.oss2.credentials.CredentialsProvider;

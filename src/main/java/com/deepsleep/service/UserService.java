@@ -1,6 +1,7 @@
 package com.deepsleep.service;
 
 
+import com.deepsleep.data.dto.SendCodeDTO;
 import com.deepsleep.data.dto.UpdateEmailDTO;
 import com.deepsleep.data.dto.UpdatePasswordDTO;
 import com.deepsleep.data.dto.UpdatePhoneDTO;
@@ -17,4 +18,8 @@ public interface UserService {
     void updatePassword(UpdatePasswordDTO dto);
     AvatarUpdateVO updateAvatar(MultipartFile avatar);
     MyUserInfoVO me();
+
+    void updateEmailCode(SendCodeDTO sendCodeDTO);
+
+    void updatePasswordCode();
 }

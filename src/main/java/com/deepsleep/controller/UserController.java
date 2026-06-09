@@ -1,6 +1,7 @@
 package com.deepsleep.controller;
 
 import com.deepsleep.annotation.RequireLogin;
+import com.deepsleep.data.dto.SendCodeDTO;
 import com.deepsleep.data.dto.UpdateEmailDTO;
 import com.deepsleep.data.dto.UpdatePasswordDTO;
 import com.deepsleep.data.dto.UpdatePhoneDTO;
@@ -10,6 +11,7 @@ import com.deepsleep.data.vo.Result;
 import com.deepsleep.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -19,6 +21,9 @@ import org.springframework.web.multipart.MultipartFile;
 public class UserController {
     private final UserService userService;
 
+    /**
+     * 获取用户个人信息
+     */
     @RequireLogin
     @GetMapping("/me")
     public Result<MyUserInfoVO> me() {
@@ -26,8 +31,19 @@ public class UserController {
     }
 
     /**
+     * 更换邮箱时获取验证码
+     * @param sendCodeDTO 新绑定的邮箱
+     */
+    @RequireLogin
+    @PostMapping("/email/code")
+    public Result<Void> updateEmailCode(@Validated @RequestBody SendCodeDTO sendCodeDTO) {
+        userService.updateEmailCode(sendCodeDTO);
+        return Result.success();
+    }
+
+    /**
      * 更换邮箱
-     * @param dto 新邮箱+旧邮箱收到的验证码
+     * @param dto 新邮箱 + 新邮箱收到的验证码
      */
     @RequireLogin
     @PutMapping("/email")
@@ -48,8 +64,19 @@ public class UserController {
     }
 
     /**
+     * 更新密码时获取验证码
+     * 向登录账号所绑定的邮箱发送验证码。若当前登陆账号未绑定邮箱，则返回错误信息。
+     */
+    @RequireLogin
+    @PostMapping("/password/code")
+    public Result<Void> updatePasswordCode() {
+        userService.updatePasswordCode();
+        return Result.success();
+    }
+
+    /**
      * 更新密码
-     * @param dto 邮箱+验证码+新密码
+     * @param dto 验证码+新密码
      */
     @RequireLogin
     @PutMapping("/password")

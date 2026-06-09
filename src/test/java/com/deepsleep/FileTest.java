@@ -1,7 +1,7 @@
 package com.deepsleep;
 
-import com.deepsleep.file.model.UploadFile;
-import com.deepsleep.file.storage.FileStorage;
+import com.deepsleep.infrastructure.file.model.UploadFile;
+import com.deepsleep.infrastructure.file.storage.FileStorage;
 import jakarta.annotation.Resource;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

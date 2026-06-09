@@ -1,4 +1,4 @@
-package com.deepsleep.email.model;
+package com.deepsleep.infrastructure.email.model;
 
 public record HtmlEmailMessage(
         String subject,

@@ -12,7 +12,7 @@ import com.deepsleep.data.enums.SelectionStatus;
 import com.deepsleep.data.po.*;
 import com.deepsleep.data.vo.ExamVO;
 import com.deepsleep.exception.BusinessException;
-import com.deepsleep.file.storage.FileStorage;
+import com.deepsleep.infrastructure.file.storage.FileStorage;
 import com.deepsleep.mapper.*;
 import com.deepsleep.service.ExamService;
 import lombok.RequiredArgsConstructor;
