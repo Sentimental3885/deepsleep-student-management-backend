@@ -2,16 +2,14 @@ package com.deepsleep.service.Impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.deepsleep.context.UserContext;
-import com.deepsleep.data.dto.SendCodeDTO;
-import com.deepsleep.data.dto.UpdateEmailDTO;
-import com.deepsleep.data.dto.UpdatePasswordDTO;
-import com.deepsleep.data.dto.UpdatePhoneDTO;
+import com.deepsleep.data.dto.*;
 import com.deepsleep.data.enums.ResultCode;
 import com.deepsleep.data.po.User;
 import com.deepsleep.data.vo.AvatarUpdateVO;
 import com.deepsleep.data.vo.MyUserInfoVO;
 import com.deepsleep.exception.BusinessException;
 import com.deepsleep.infrastructure.code.email.EmailVerificationService;
+import com.deepsleep.infrastructure.code.sms.SmsVerificationService;
 import com.deepsleep.infrastructure.code.store.CodeScene;
 import com.deepsleep.infrastructure.email.model.MailFactory;
 import com.deepsleep.infrastructure.file.model.UploadFile;
@@ -35,10 +33,11 @@ public class UserServiceImpl implements UserService {
     private final UserMapper userMapper;
     private final EmailVerificationService emailVerificationService;
     private final MailFactory mailFactory;
+    private final SmsVerificationService smsVerificationService;
     private final FileStorage fileStorage;
 
     @Override
-    public void updateEmailCode(SendCodeDTO sendCodeDTO) {
+    public void updateEmailCode(SendEmailCodeDTO sendCodeDTO) {
         // 如邮箱已被其他用户（包括用户自己）绑定，则不能重复绑定。
         boolean exists = userMapper.exists(
                 new LambdaQueryWrapper<User>()
@@ -68,24 +67,32 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public void updatePhoneCode(SendPhoneCodeDTO sendPhoneCodeDTO) {
+        boolean exists = userMapper.exists(
+                new LambdaQueryWrapper<User>()
+                        .eq(User::getPhone, sendPhoneCodeDTO.phone())
+        );
+        if (exists) throw new BusinessException(ResultCode.PHONE_CONFLICTED);
+
+        smsVerificationService.sendSmsCode(
+                CodeScene.UPDATE_PHONE,
+                sendPhoneCodeDTO.phone()
+        );
+    }
+
+    @Override
     public void updatePhone(UpdatePhoneDTO dto) {
-//        Long userId = UserContext.getUserId();
-//        // 取邮箱校验验证码
-//        User user = userMapper.selectById(userId);
-//        if (user.getEmail() == null) throw new BusinessException(ResultCode.EMAIL_NOT_BOUND);
-//        emailService.verifyCode(user.getEmail(), dto.getCode());
-//        // 检查手机号是否被占用
-//        Long count = userMapper.selectCount(
-//                new LambdaQueryWrapper<User>()
-//                        .eq(User::getPhone, dto.getPhone())
-//                        .ne(User::getId, userId)
-//        );
-//        if (count > 0) throw new BusinessException(ResultCode.PHONE_CONFLICTED);
-//
-//        User update = new User();
-//        update.setId(userId);
-//        update.setPhone(dto.getPhone());
-//        userMapper.updateById(update);
+        Long userId = UserContext.getUserId();
+        smsVerificationService.checkSmsCode(
+                CodeScene.UPDATE_PHONE,
+                dto.getPhone(),
+                dto.getCode()
+        );
+
+        User update = new User();
+        update.setId(userId);
+        update.setPhone(dto.getPhone());
+        userMapper.updateById(update);
     }
 
     @Override

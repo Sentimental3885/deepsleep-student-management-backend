@@ -7,6 +7,8 @@ public enum CodeScene {
 
     UPDATE_EMAIL(Channel.email, "updateEmail"),
     UPDATE_PASSWORD(Channel.email, "updatePassword"),
+
+    UPDATE_PHONE(Channel.sms, "updatePhone")
     ;
 
     private final Channel channel;
@@ -21,6 +23,6 @@ public enum CodeScene {
     }
 
     enum Channel {
-        sms, email;
+        sms, email
     }
 }

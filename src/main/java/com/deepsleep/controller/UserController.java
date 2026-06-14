@@ -1,10 +1,7 @@
 package com.deepsleep.controller;
 
 import com.deepsleep.annotation.RequireLogin;
-import com.deepsleep.data.dto.SendCodeDTO;
-import com.deepsleep.data.dto.UpdateEmailDTO;
-import com.deepsleep.data.dto.UpdatePasswordDTO;
-import com.deepsleep.data.dto.UpdatePhoneDTO;
+import com.deepsleep.data.dto.*;
 import com.deepsleep.data.vo.AvatarUpdateVO;
 import com.deepsleep.data.vo.MyUserInfoVO;
 import com.deepsleep.data.vo.Result;
@@ -32,12 +29,12 @@ public class UserController {
 
     /**
      * 更换邮箱时获取验证码
-     * @param sendCodeDTO 新绑定的邮箱
+     * @param sendEmailCodeDTO 新绑定的邮箱
      */
     @RequireLogin
     @PostMapping("/email/code")
-    public Result<Void> updateEmailCode(@Validated @RequestBody SendCodeDTO sendCodeDTO) {
-        userService.updateEmailCode(sendCodeDTO);
+    public Result<Void> updateEmailCode(@Validated @RequestBody SendEmailCodeDTO sendEmailCodeDTO) {
+        userService.updateEmailCode(sendEmailCodeDTO);
         return Result.success();
     }
 
@@ -53,8 +50,18 @@ public class UserController {
     }
 
     /**
+     * 更换手机号时获取手机验证码
+     */
+    @RequireLogin
+    @PostMapping("/phone/code")
+    public Result<Void> updatePhoneCode(@Validated @RequestBody SendPhoneCodeDTO sendPhoneCodeDTO) {
+        userService.updatePhoneCode(sendPhoneCodeDTO);
+        return Result.success();
+    }
+
+    /**
      * 更换手机号
-     * @param dto 新手机号+接收到的邮箱验证码
+     * @param dto 新手机号 + 新手机号接收到的验证码
      */
     @RequireLogin
     @PutMapping("/phone")
