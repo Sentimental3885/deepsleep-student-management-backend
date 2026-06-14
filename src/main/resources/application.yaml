@@ -78,3 +78,10 @@ aliyun:
     endpoint: http://dssm.sentiexception.com
     bucket: deepsleep-student-management-oss
     presigned-url-expire-seconds: 3600
+
+  sms:
+    access-key-id: ${SMS_ACCESS_KEY_ID}
+    access-key-secret: ${SMS_ACCESS_KEY_SECRET}
+    endpoint: dypnsapi.aliyuncs.com
+    sign-name: 速通互联验证码
+    template-code: 100001

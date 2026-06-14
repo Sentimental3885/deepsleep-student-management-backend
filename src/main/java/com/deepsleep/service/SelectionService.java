@@ -4,7 +4,10 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.deepsleep.data.dto.EndCourseDTO;
 import com.deepsleep.data.dto.ScoreQueryDTO;
 import com.deepsleep.data.dto.SelectionQueryDTO;
-import com.deepsleep.data.vo.*;
+import com.deepsleep.data.vo.CourseStudentVO;
+import com.deepsleep.data.vo.CourseVO;
+import com.deepsleep.data.vo.Result;
+import com.deepsleep.data.vo.ScoreVO;
 
 import java.util.List;
 

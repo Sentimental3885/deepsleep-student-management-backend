@@ -65,6 +65,7 @@ public enum ResultCode {
     @Deprecated
     EMAIL_CODE_ERROR(8001, "邮箱验证码错误", HttpStatus.BAD_REQUEST),
     EMAIL_SEND_FAILED(8003, "构建/发送HTML邮件失败", HttpStatus.INTERNAL_SERVER_ERROR),
+    SMS_SEND_FAILED(8004, "短信发送失败", HttpStatus.INTERNAL_SERVER_ERROR),
 
     FILE_UPLOAD_FAILED(7000, "文件上传失败", HttpStatus.INTERNAL_SERVER_ERROR),
     FILE_DELETE_FAILED(7001, "文件删除失败", HttpStatus.INTERNAL_SERVER_ERROR),
