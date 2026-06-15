@@ -1,15 +1,19 @@
 package com.deepsleep.controller;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.deepsleep.annotation.RequireRole;
+import com.deepsleep.data.dto.TeacherOptionQueryDTO;
 import com.deepsleep.data.dto.UpdateTeacherDTO;
 import com.deepsleep.data.enums.RoleEnum;
 import com.deepsleep.data.vo.ExamVO;
 import com.deepsleep.data.vo.Result;
 import com.deepsleep.data.vo.ScheduleVO;
 import com.deepsleep.data.vo.TeacherCourseVO;
+import com.deepsleep.data.vo.TeacherOptionVO;
 import com.deepsleep.data.vo.TeacherProfileVO;
 import com.deepsleep.service.ExamService;
 import com.deepsleep.service.TeacherService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,6 +26,16 @@ public class TeacherController {
 
     private final TeacherService teacherService;
     private final ExamService examService;
+
+    /**
+     * 教师选择器
+     */
+    @RequireRole({RoleEnum.ADMIN, RoleEnum.TEACHER})
+    @GetMapping("/options")
+    public Result<IPage<TeacherOptionVO>> getTeacherOptions(@ModelAttribute @Valid TeacherOptionQueryDTO dto) {
+        dto.setDefaultValue();
+        return Result.success(teacherService.getTeacherOptions(dto));
+    }
 
     /**
      * 查看教师个人信息

@@ -1,15 +1,20 @@
 package com.deepsleep.service.Impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.deepsleep.context.UserContext;
+import com.deepsleep.data.dto.TeacherOptionQueryDTO;
 import com.deepsleep.data.dto.UpdateTeacherDTO;
 import com.deepsleep.data.po.Classroom;
 import com.deepsleep.data.po.Course;
 import com.deepsleep.data.po.CourseSchedule;
+import com.deepsleep.data.po.Dept;
 import com.deepsleep.data.po.Teacher;
 import com.deepsleep.data.po.User;
 import com.deepsleep.data.vo.ScheduleVO;
 import com.deepsleep.data.vo.TeacherCourseVO;
+import com.deepsleep.data.vo.TeacherOptionVO;
 import com.deepsleep.data.vo.TeacherProfileVO;
 import com.deepsleep.infrastructure.file.storage.FileStorage;
 import com.deepsleep.mapper.ClassroomMapper;
@@ -125,5 +130,35 @@ public class TeacherServiceImpl implements TeacherService {
             }
             return vo;
         }).toList();
+    }
+
+    @Override
+    public IPage<TeacherOptionVO> getTeacherOptions(TeacherOptionQueryDTO dto) {
+        LambdaQueryWrapper<Teacher> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(dto.getDeptId() != null, Teacher::getDeptId, dto.getDeptId())
+                .exists(dto.getKeyword() != null && !dto.getKeyword().isBlank(),
+                        "SELECT 1 FROM user u WHERE u.id = teacher.user_id " +
+                                "AND (u.name LIKE {0} OR u.username LIKE {0})",
+                        "%" + dto.getKeyword() + "%")
+                .orderByAsc(Teacher::getUserId);
+        Page<Teacher> page = new Page<>(dto.getPageNum(), dto.getPageSize());
+        return teacherMapper.selectPage(page, wrapper).convert(this::toTeacherOptionVO);
+    }
+
+    private TeacherOptionVO toTeacherOptionVO(Teacher teacher) {
+        User user = userMapper.selectById(teacher.getUserId());
+        Dept dept = deptMapper.selectById(teacher.getDeptId());
+        TeacherOptionVO vo = new TeacherOptionVO();
+        vo.setId(teacher.getUserId());
+        vo.setDeptId(teacher.getDeptId());
+        vo.setTitle(teacher.getTitle());
+        if (user != null) {
+            vo.setUsername(user.getUsername());
+            vo.setName(user.getName());
+        }
+        if (dept != null) {
+            vo.setDeptName(dept.getName());
+        }
+        return vo;
     }
 }
