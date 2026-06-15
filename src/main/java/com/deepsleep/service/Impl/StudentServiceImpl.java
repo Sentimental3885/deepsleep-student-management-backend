@@ -84,6 +84,7 @@ public class StudentServiceImpl implements StudentService {
             Course course = courseMapper.selectById(schedule.getCourseId());
             Classroom classroom = classroomMapper.selectById(schedule.getClassroomId());
             User teacher = userMapper.selectById(course.getTeacherId());
+            vo.setId(schedule.getId());
             vo.setCourseId(course.getId());
             vo.setCourseName(course.getName());
             vo.setTeacherName(teacher.getName());

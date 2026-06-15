@@ -10,10 +10,17 @@ public class SelectionQueryDTO {
 
     @Min(value = 1)
     private Integer pageNum;
+
     @Min(value = 1)
     private Integer pageSize;
 
-    //使用该DTO，手动调用这个方法，排除空值
+    private String keyword;
+    private String semester;
+    private Integer weekday;
+    private Double creditMin;
+    private Double creditMax;
+    private Boolean noConflictOnly;
+
     public void setDefaultValue() {
         pageNum = pageNum == null ? DEFAULT_PAGE_NUM : pageNum;
         pageSize = pageSize == null ? DEFAULT_PAGE_SIZE : pageSize;

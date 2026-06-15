@@ -1,6 +1,7 @@
 package com.deepsleep.service.Impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.deepsleep.data.dto.ClassroomAvailableQueryDTO;
 import com.deepsleep.data.dto.ClassroomDTO;
 import com.deepsleep.data.enums.ResultCode;
 import com.deepsleep.data.po.Classroom;
@@ -16,6 +17,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -71,6 +74,31 @@ public class ClassroomServiceImpl implements ClassroomService {
     @Override
     public List<ClassroomVO> listClassrooms() {
         return classroomMapper.selectList(null).stream().map(classroom -> {
+            ClassroomVO vo = new ClassroomVO();
+            vo.setId(classroom.getId());
+            vo.setName(classroom.getName());
+            return vo;
+        }).toList();
+    }
+
+    @Override
+    public List<ClassroomVO> listAvailableClassrooms(ClassroomAvailableQueryDTO dto) {
+        LambdaQueryWrapper<CourseSchedule> scheduleWrapper = new LambdaQueryWrapper<>();
+        scheduleWrapper.eq(CourseSchedule::getWeekday, dto.getWeekday())
+                .eq(CourseSchedule::getSection, dto.getSection())
+                .ge(CourseSchedule::getEndWeek, dto.getStartWeek())
+                .le(CourseSchedule::getStartWeek, dto.getEndWeek())
+                .exists(dto.getSemester() != null && !dto.getSemester().isBlank(),
+                        "SELECT 1 FROM course c WHERE c.id = course_schedule.course_id AND c.semester = {0}",
+                        dto.getSemester());
+        Set<Long> occupiedClassroomIds = courseScheduleMapper.selectList(scheduleWrapper).stream()
+                .map(CourseSchedule::getClassroomId)
+                .collect(Collectors.toSet());
+
+        LambdaQueryWrapper<Classroom> classroomWrapper = new LambdaQueryWrapper<>();
+        classroomWrapper.notIn(!occupiedClassroomIds.isEmpty(), Classroom::getId, occupiedClassroomIds)
+                .orderByAsc(Classroom::getId);
+        return classroomMapper.selectList(classroomWrapper).stream().map(classroom -> {
             ClassroomVO vo = new ClassroomVO();
             vo.setId(classroom.getId());
             vo.setName(classroom.getName());

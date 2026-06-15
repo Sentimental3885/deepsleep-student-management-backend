@@ -2,6 +2,7 @@ package com.deepsleep.controller;
 
 import com.deepsleep.annotation.RequireLogin;
 import com.deepsleep.annotation.RequireRole;
+import com.deepsleep.data.dto.ClassroomAvailableQueryDTO;
 import com.deepsleep.data.dto.ClassroomDTO;
 import com.deepsleep.data.enums.RoleEnum;
 import com.deepsleep.data.vo.ClassroomVO;
@@ -27,6 +28,15 @@ public class ClassroomController {
     @GetMapping("/list")
     public Result<List<ClassroomVO>> listClassrooms() {
         return Result.success(classroomService.listClassrooms());
+    }
+
+    /**
+     * 查询指定时间段可用教室
+     */
+    @RequireRole({RoleEnum.ADMIN, RoleEnum.TEACHER})
+    @GetMapping("/available")
+    public Result<List<ClassroomVO>> listAvailableClassrooms(@Valid ClassroomAvailableQueryDTO dto) {
+        return Result.success(classroomService.listAvailableClassrooms(dto));
     }
 
     /**

@@ -13,6 +13,7 @@ public interface ExamService {
     void deleteExam(Long id);
     ExamVO getExamDetail(Long id);
     Page<ExamVO> getAllExams(int pageNum, int pageSize);
+    List<ExamVO> getExamsByCourse(Long courseId);
     List<ExamVO> getMyExamsAsStudent();
     List<ExamVO> getMyExamsAsInvigilator();
 }

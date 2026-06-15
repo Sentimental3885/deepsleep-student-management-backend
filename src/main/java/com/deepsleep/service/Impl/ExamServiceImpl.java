@@ -142,6 +142,19 @@ public class ExamServiceImpl implements ExamService {
     }
 
     @Override
+    public List<ExamVO> getExamsByCourse(Long courseId) {
+        if (courseMapper.selectById(courseId) == null) {
+            throw new BusinessException(ResultCode.COURSE_NOT_FOUND);
+        }
+        List<Exam> exams = examMapper.selectList(
+                new LambdaQueryWrapper<Exam>()
+                        .eq(Exam::getCourseId, courseId)
+                        .orderByAsc(Exam::getExamTime)
+        );
+        return exams.stream().map(this::convertToVO).toList();
+    }
+
+    @Override
     public List<ExamVO> getMyExamsAsStudent() {
         Long userId = UserContext.getUserId();
         // 查学生选了哪些课

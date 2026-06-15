@@ -1,6 +1,9 @@
 package com.deepsleep.data.vo;
 
+import com.deepsleep.data.enums.SelectionStatus;
 import lombok.Data;
+
+import java.util.List;
 
 @Data
 public class CourseVO {
@@ -16,4 +19,8 @@ public class CourseVO {
     private Double credit;
     private Integer status;
     private String introduction;
+    private List<ClazzVO> clazzes;
+    private Boolean selectable;
+    private String unselectableReason;
+    private SelectionStatus mySelectionStatus;
 }

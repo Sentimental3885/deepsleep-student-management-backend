@@ -3,7 +3,9 @@ package com.deepsleep.controller;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.deepsleep.annotation.RequireRole;
 import com.deepsleep.context.UserContext;
+import com.deepsleep.data.dto.CourseStudentQueryDTO;
 import com.deepsleep.data.dto.EndCourseDTO;
+import com.deepsleep.data.dto.EndCourseBatchDTO;
 import com.deepsleep.data.dto.ScoreQueryDTO;
 import com.deepsleep.data.dto.SelectionQueryDTO;
 import com.deepsleep.data.enums.RoleEnum;
@@ -11,6 +13,7 @@ import com.deepsleep.data.vo.CourseStudentVO;
 import com.deepsleep.data.vo.CourseVO;
 import com.deepsleep.data.vo.Result;
 import com.deepsleep.data.vo.ScoreVO;
+import com.deepsleep.data.vo.SelectionCheckVO;
 import com.deepsleep.service.SelectionService;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
@@ -68,6 +71,24 @@ public class SelectionController {
     }
 
     /**
+     * 批量结课/录入成绩
+     */
+    @RequireRole(RoleEnum.TEACHER)
+    @PutMapping("/end/batch")
+    public Result<Void> endCourseBatch(@RequestBody @Valid EndCourseBatchDTO dto) {
+        return selectionService.endCourseBatch(UserContext.getUserId(), dto);
+    }
+
+    /**
+     * 选课前可选性检查
+     */
+    @RequireRole(RoleEnum.STUDENT)
+    @GetMapping("/course/{cid}/check")
+    public Result<SelectionCheckVO> checkSelectable(@PathVariable Long cid) {
+        return selectionService.checkSelectable(UserContext.getUserId(), cid);
+    }
+
+    /**
      * 查询已选课程
      * @param dto 查询参数，支持null和仅传部分参数
      * @return 课程选择列表
@@ -89,6 +110,16 @@ public class SelectionController {
         return selectionService.showCourseStudents(UserContext.getUserId(), cid);
     }
 
+    /**
+     * 查询某课程学生列表
+     */
+    @RequireRole({RoleEnum.ADMIN, RoleEnum.TEACHER})
+    @GetMapping("/courseStudents/{cid}")
+    public Result<IPage<CourseStudentVO>> showCourseStudents(@PathVariable Long cid,
+                                                             @Valid CourseStudentQueryDTO dto) {
+        dto.setDefaultValue();
+        return selectionService.showCourseStudents(UserContext.getUserId(), UserContext.getRole(), cid, dto);
+    }
 
     /**
      * 学生查询成绩

@@ -1,16 +1,22 @@
 package com.deepsleep.controller;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.deepsleep.annotation.RequireLogin;
 import com.deepsleep.annotation.RequireRole;
 import com.deepsleep.context.UserContext;
 import com.deepsleep.data.dto.AddCourseDTO;
+import com.deepsleep.data.dto.CourseClazzUpdateDTO;
+import com.deepsleep.data.dto.CourseQueryDTO;
 import com.deepsleep.data.dto.ScheduleDTO;
 import com.deepsleep.data.dto.UpdateCourseDTO;
 import com.deepsleep.data.enums.RoleEnum;
+import com.deepsleep.data.vo.ClazzVO;
 import com.deepsleep.data.vo.CourseVO;
+import com.deepsleep.data.vo.ExamVO;
 import com.deepsleep.data.vo.Result;
 import com.deepsleep.data.vo.ScheduleVO;
 import com.deepsleep.service.CourseService;
+import com.deepsleep.service.ExamService;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
@@ -23,6 +29,9 @@ public class CourseController {
 
     @Resource
     private CourseService courseService;
+
+    @Resource
+    private ExamService examService;
 
     /**
      * 增加课程
@@ -42,6 +51,44 @@ public class CourseController {
     @GetMapping("/detail/{cid}")
     public Result<CourseVO> detailCourse(@PathVariable Long cid){
         return courseService.getDetail(cid);
+    }
+
+    /**
+     * 课程列表
+     */
+    @RequireRole(RoleEnum.ADMIN)
+    @GetMapping("/list")
+    public Result<IPage<CourseVO>> listCourses(@Valid CourseQueryDTO dto) {
+        dto.setDefaultValue();
+        return courseService.listCourses(dto);
+    }
+
+    /**
+     * 课程适用班级
+     */
+    @RequireLogin
+    @GetMapping("/{cid}/clazzes")
+    public Result<List<ClazzVO>> getCourseClazzes(@PathVariable Long cid) {
+        return courseService.getCourseClazzes(cid);
+    }
+
+    /**
+     * 更新课程适用班级
+     */
+    @RequireRole(RoleEnum.ADMIN)
+    @PutMapping("/{cid}/clazzes")
+    public Result<Void> updateCourseClazzes(@PathVariable Long cid,
+                                            @RequestBody @Valid CourseClazzUpdateDTO dto) {
+        return courseService.updateCourseClazzes(cid, dto);
+    }
+
+    /**
+     * 课程考试列表
+     */
+    @RequireLogin
+    @GetMapping("/{cid}/exams")
+    public Result<List<ExamVO>> getCourseExams(@PathVariable Long cid) {
+        return Result.success(examService.getExamsByCourse(cid));
     }
 
     /**

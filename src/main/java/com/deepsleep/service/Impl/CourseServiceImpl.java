@@ -1,13 +1,18 @@
 package com.deepsleep.service.Impl;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.deepsleep.data.dto.AddCourseDTO;
+import com.deepsleep.data.dto.CourseClazzUpdateDTO;
+import com.deepsleep.data.dto.CourseQueryDTO;
 import com.deepsleep.data.dto.ScheduleDTO;
 import com.deepsleep.data.dto.UpdateCourseDTO;
 import com.deepsleep.data.enums.CourseStatus;
 import com.deepsleep.data.enums.ResultCode;
 import com.deepsleep.data.po.*;
 import com.deepsleep.data.vo.CourseVO;
+import com.deepsleep.data.vo.ClazzVO;
 import com.deepsleep.data.vo.Result;
 import com.deepsleep.data.vo.ScheduleVO;
 import com.deepsleep.exception.BusinessException;
@@ -44,6 +49,12 @@ public class CourseServiceImpl implements CourseService {
     private ClazzMapper clazzMapper;
 
     @Resource
+    private DeptMapper deptMapper;
+
+    @Resource
+    private MajorMapper majorMapper;
+
+    @Resource
     private UserMapper userMapper;
 
     @Resource
@@ -57,6 +68,41 @@ public class CourseServiceImpl implements CourseService {
 
     @Resource
     private ClassroomMapper classroomMapper;
+
+    private CourseVO toCourseVO(Course po) {
+        CourseVO vo = new CourseVO();
+        BeanUtils.copyProperties(po, vo);
+        vo.setStatus(po.getStatus().getValue());
+        User teacher = userMapper.selectById(po.getTeacherId());
+        if (teacher != null) {
+            vo.setTeacherName(teacher.getName());
+            vo.setTeacherAvatar(fileStorage.getUrl(teacher.getAvatar()));
+        }
+        vo.setSize(selectionService.currentSize(po.getId()));
+        vo.setClazzes(getClazzesByCourse(po.getId()));
+        return vo;
+    }
+
+    private List<ClazzVO> getClazzesByCourse(Long cid) {
+        List<CourseClazz> relations = ccMapper.selectList(
+                new LambdaQueryWrapper<CourseClazz>().eq(CourseClazz::getCourseId, cid)
+        );
+        return relations.stream().map(relation -> {
+            Clazz clazz = clazzMapper.selectById(relation.getClazzId());
+            if (clazz == null) return null;
+            ClazzVO vo = new ClazzVO();
+            vo.setId(clazz.getId());
+            vo.setName(clazz.getName());
+            vo.setDeptId(clazz.getDeptId());
+            vo.setMajorId(clazz.getMajorId());
+            vo.setGrade(clazz.getGrade());
+            Dept dept = deptMapper.selectById(clazz.getDeptId());
+            if (dept != null) vo.setDeptName(dept.getName());
+            Major major = majorMapper.selectById(clazz.getMajorId());
+            if (major != null) vo.setMajorName(major.getName());
+            return vo;
+        }).filter(Objects::nonNull).toList();
+    }
 
     //添加课程，暂不加排课
     @Transactional
@@ -95,14 +141,53 @@ public class CourseServiceImpl implements CourseService {
         if (po == null) {
             throw new BusinessException(ResultCode.COURSE_NOT_FOUND);
         }
-        CourseVO vo = new CourseVO();
-        BeanUtils.copyProperties(po, vo);
-        vo.setStatus(po.getStatus().getValue());
-        User teacher = userMapper.selectById(po.getTeacherId());
-        vo.setTeacherName(teacher.getName());
-        vo.setTeacherAvatar(fileStorage.getUrl(teacher.getAvatar()));
-        vo.setSize(selectionService.currentSize(po.getId()));
-        return Result.success(vo);
+        return Result.success(toCourseVO(po));
+    }
+
+    @Override
+    public Result<IPage<CourseVO>> listCourses(CourseQueryDTO dto) {
+        LambdaQueryWrapper<Course> wrapper = new LambdaQueryWrapper<>();
+        wrapper.and(dto.getKeyword() != null && !dto.getKeyword().isBlank(), w -> w
+                        .like(Course::getName, dto.getKeyword())
+                        .or()
+                        .like(Course::getCode, dto.getKeyword()))
+                .eq(dto.getSemester() != null && !dto.getSemester().isBlank(), Course::getSemester, dto.getSemester())
+                .eq(dto.getStatus() != null, Course::getStatus,
+                        dto.getStatus() == null ? null : CourseStatus.fromValue(dto.getStatus()))
+                .eq(dto.getTeacherId() != null, Course::getTeacherId, dto.getTeacherId())
+                .exists(dto.getClazzId() != null,
+                        "SELECT 1 FROM course_clazz cc WHERE cc.course_id = course.id AND cc.clazz_id = {0}",
+                        dto.getClazzId())
+                .orderByDesc(Course::getCreateTime);
+        Page<Course> page = new Page<>(dto.getPageNum(), dto.getPageSize());
+        return Result.success(courseMapper.selectPage(page, wrapper).convert(this::toCourseVO));
+    }
+
+    @Override
+    public Result<List<ClazzVO>> getCourseClazzes(Long cid) {
+        if (courseMapper.selectById(cid) == null) {
+            throw new BusinessException(ResultCode.COURSE_NOT_FOUND);
+        }
+        return Result.success(getClazzesByCourse(cid));
+    }
+
+    @Transactional
+    @Override
+    public Result<Void> updateCourseClazzes(Long cid, CourseClazzUpdateDTO dto) {
+        if (courseMapper.selectById(cid) == null) {
+            throw new BusinessException(ResultCode.COURSE_NOT_FOUND);
+        }
+        List<Long> clazzIds = dto.getClazzIds().stream().distinct().toList();
+        for (Long clazzId : clazzIds) {
+            if (clazzMapper.selectById(clazzId) == null) {
+                throw new BusinessException(ResultCode.CLAZZ_NOT_FOUND);
+            }
+        }
+        ccMapper.delete(new LambdaQueryWrapper<CourseClazz>().eq(CourseClazz::getCourseId, cid));
+        for (Long clazzId : clazzIds) {
+            ccMapper.insert(new CourseClazz(null, cid, clazzId, LocalDateTime.now()));
+        }
+        return Result.success();
     }
 
     //删除课程
@@ -148,6 +233,7 @@ public class CourseServiceImpl implements CourseService {
             Course course = courseMapper.selectById(schedule.getCourseId());
             Classroom classroom = classroomMapper.selectById(schedule.getClassroomId());
             User teacher = userMapper.selectById(course.getTeacherId());
+            vo.setId(schedule.getId());
             vo.setCourseId(course.getId());
             vo.setCourseName(course.getName());
             vo.setTeacherName(teacher.getName());

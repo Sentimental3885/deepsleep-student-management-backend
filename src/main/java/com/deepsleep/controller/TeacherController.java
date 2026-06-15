@@ -5,6 +5,7 @@ import com.deepsleep.data.dto.UpdateTeacherDTO;
 import com.deepsleep.data.enums.RoleEnum;
 import com.deepsleep.data.vo.ExamVO;
 import com.deepsleep.data.vo.Result;
+import com.deepsleep.data.vo.ScheduleVO;
 import com.deepsleep.data.vo.TeacherCourseVO;
 import com.deepsleep.data.vo.TeacherProfileVO;
 import com.deepsleep.service.ExamService;
@@ -49,6 +50,15 @@ public class TeacherController {
     @GetMapping("/courses")
     public Result<List<TeacherCourseVO>> getMyCourses(){
         return Result.success(teacherService.getMyCourses());
+    }
+
+    /**
+     * 教师查看自己的授课课表
+     */
+    @RequireRole(RoleEnum.TEACHER)
+    @GetMapping("/schedule")
+    public Result<List<ScheduleVO>> getMySchedule() {
+        return Result.success(teacherService.getMySchedule());
     }
 
     /**

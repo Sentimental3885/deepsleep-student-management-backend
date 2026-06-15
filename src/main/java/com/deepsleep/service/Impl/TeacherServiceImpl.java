@@ -3,12 +3,17 @@ package com.deepsleep.service.Impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.deepsleep.context.UserContext;
 import com.deepsleep.data.dto.UpdateTeacherDTO;
+import com.deepsleep.data.po.Classroom;
 import com.deepsleep.data.po.Course;
+import com.deepsleep.data.po.CourseSchedule;
 import com.deepsleep.data.po.Teacher;
 import com.deepsleep.data.po.User;
+import com.deepsleep.data.vo.ScheduleVO;
 import com.deepsleep.data.vo.TeacherCourseVO;
 import com.deepsleep.data.vo.TeacherProfileVO;
 import com.deepsleep.infrastructure.file.storage.FileStorage;
+import com.deepsleep.mapper.ClassroomMapper;
+import com.deepsleep.mapper.CourseScheduleMapper;
 import com.deepsleep.mapper.CourseMapper;
 import com.deepsleep.mapper.DeptMapper;
 import com.deepsleep.mapper.TeacherMapper;
@@ -29,6 +34,8 @@ public class TeacherServiceImpl implements TeacherService {
     private final UserMapper userMapper;
     private final FileStorage fileStorage;
     private final CourseMapper courseMapper;
+    private final CourseScheduleMapper courseScheduleMapper;
+    private final ClassroomMapper classroomMapper;
     private final SelectionService selectionService;
 
     @Override
@@ -75,6 +82,47 @@ public class TeacherServiceImpl implements TeacherService {
             vo.setSize(selectionService.currentSize(course.getId()));
             vo.setCredit(course.getCredit());
             vo.setStatus(course.getStatus().getValue());
+            return vo;
+        }).toList();
+    }
+
+    @Override
+    public List<ScheduleVO> getMySchedule() {
+        Long userId = UserContext.getUserId();
+        List<Course> courses = courseMapper.selectList(new LambdaQueryWrapper<Course>()
+                .eq(Course::getTeacherId, userId)
+        );
+        if (courses.isEmpty()) return List.of();
+
+        List<Long> courseIds = courses.stream().map(Course::getId).toList();
+        List<CourseSchedule> schedules = courseScheduleMapper.selectList(
+                new LambdaQueryWrapper<CourseSchedule>()
+                        .in(CourseSchedule::getCourseId, courseIds)
+                        .orderByAsc(CourseSchedule::getWeekday)
+                        .orderByAsc(CourseSchedule::getSection)
+                        .orderByAsc(CourseSchedule::getStartWeek)
+        );
+
+        User teacher = userMapper.selectById(userId);
+        return schedules.stream().map(schedule -> {
+            Course course = courseMapper.selectById(schedule.getCourseId());
+            Classroom classroom = classroomMapper.selectById(schedule.getClassroomId());
+            ScheduleVO vo = new ScheduleVO();
+            vo.setId(schedule.getId());
+            vo.setCourseId(course.getId());
+            vo.setCourseName(course.getName());
+            if (teacher != null) {
+                vo.setTeacherName(teacher.getName());
+                vo.setTeacherAvatar(fileStorage.getUrl(teacher.getAvatar()));
+            }
+            vo.setWeekday(schedule.getWeekday());
+            vo.setSection(schedule.getSection());
+            vo.setStartWeek(schedule.getStartWeek());
+            vo.setEndWeek(schedule.getEndWeek());
+            if (classroom != null) {
+                vo.setClassroomId(classroom.getId());
+                vo.setClassroomName(classroom.getName());
+            }
             return vo;
         }).toList();
     }

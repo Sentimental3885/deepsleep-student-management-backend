@@ -76,7 +76,7 @@ public class AnalysisServiceImpl implements AnalysisService {
 
         // 调deepseekAPI分析
         String userMessage = "以下为该学生的成绩数据，请按要求进行分析:\n"+currentSnapshot;
-        String analysisContent = deepseekService.chat(System_Prompt,userMessage);
+        String analysisContent = deepseekService.chat(System_Prompt, userMessage);
 
         GradeAnalysis analysis = new GradeAnalysis();
         analysis.setStudentId(userId);
