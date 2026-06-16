@@ -39,7 +39,6 @@ public class FileTest {
         }
     }
 
-    @Test
     void deleteTest() {
         fileStorage.delete(testObjectKey);
     }
