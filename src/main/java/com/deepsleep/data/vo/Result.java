@@ -40,6 +40,10 @@ public record Result<T> (
         return new Result<>(resultCode.getCode(), null, msg);
     }
 
+    public static <T> Result<T> error(ResultCode resultCode, T data, String msg) {
+        return new Result<>(resultCode.getCode(), data, msg);
+    }
+
     public boolean isSuccess() {
         return this.code != null && this.code == 200;
     }

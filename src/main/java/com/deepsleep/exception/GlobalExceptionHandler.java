@@ -14,19 +14,26 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
+
 @RestControllerAdvice
 @Slf4j
 public class GlobalExceptionHandler {
 
     /**
      * 处理业务异常
-     * 返回状态码+Result（业务码+message）
      */
     @ExceptionHandler(BusinessException.class)
-    public ResponseEntity<Result<?>> handleBusinessException(BusinessException e){
-        log.warn("业务异常：code={},msg={}",e.getResultCode().getCode(),e.getMsg());
-        return ResponseEntity.status(e.getResultCode().getHttpStatus())
-                .body(Result.error(e.getResultCode(),e.getMsg()));
+    public <T> ResponseEntity<Result<T>> handleBizException(BusinessException be) {
+        log.warn("业务异常 | 业务码：{} | 信息：{}", be.getResultCode().getCode(), be.getResultCode().getMsg());
+        return ResponseEntity
+                .status(be.getResultCode().getHttpStatus())
+                .body(
+                        Result.error(be.getResultCode(), be.getMessage())
+                );
     }
 
     /**
@@ -50,21 +57,35 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * 处理参数校验异常（@Valid 触发的）
+     * 请求体字段校验异常
      */
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Result<?>> handleValidException(MethodArgumentNotValidException e) {
-        // 取出第一条校验错误信息
-        String msg = e.getBindingResult()
+    public  ResponseEntity<Result<Map<String, String>>> handleMethodArgumentNotValidException(
+            MethodArgumentNotValidException ex,
+            HttpServletRequest request
+    ) {
+
+        Map<String, String> fieldErrors = ex.getBindingResult()
                 .getFieldErrors()
                 .stream()
-                .map(FieldError::getDefaultMessage)
-                .findFirst()
-                .orElse("参数错误");
-        log.warn("参数校验失败: {}", msg);
+                .collect(Collectors.toMap(
+                        FieldError::getField,
+                        error -> Objects.toString(error.getDefaultMessage(), "参数校验失败"),
+                        (first, ignored) -> first,
+                        LinkedHashMap::new
+                ));
+
+        log.warn(
+                "请求体字段不合规范 | 信息：{} | 路径：{} {}",
+                fieldErrors,
+                request.getMethod(),
+                request.getRequestURI()
+        );
         return ResponseEntity
                 .status(ResultCode.BAD_REQUEST.getHttpStatus())
-                .body(Result.error(ResultCode.BAD_REQUEST));
+                .body(
+                        Result.error(ResultCode.BAD_REQUEST, fieldErrors, "请求体字段格式错误")
+                );
     }
 
     /**

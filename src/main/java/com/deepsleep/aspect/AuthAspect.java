@@ -60,6 +60,8 @@ public class AuthAspect {
             if(!matched) throw new BusinessException(ResultCode.FORBIDDEN);
         }
 
+        request.setAttribute(LogInterceptor.CURRENT_USER_ID_ATTR, UserContext.getUserId());
+
         try {
             return pjp.proceed();
         }finally{

@@ -36,13 +36,6 @@ mybatis-plus:
   type-aliases-package: com.deepsleep.data.po
   configuration:
     map-underscore-to-camel-case: true
-    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
-
-# 日志
-logging:
-  level:
-    com.deepsleep: debug
-
 
 # DeepSeek API配置
 dssm:
@@ -53,8 +46,6 @@ dssm:
     max-tokens: 4096
 
   code:
-    enabled: true
-    sms-provider: aliyun
     interval-lock-expire-seconds: 60
     code-expire-seconds: 300
     max-fail-number: 5
@@ -66,7 +57,7 @@ dssm:
 #jwt
 jwt:
   secret: deeepsleep2026studentmanagementbackendsecretkey
-  expiration: 86400000
+  expiration: 3600
 
 server:
   port: 22224
