@@ -33,7 +33,7 @@ dssm:
 
 jwt:
   secret: ${JWT_SECRET}
-  expiration: ${JWT_EXPIRATION_SECONDS:3600}
+  expiration-seconds: ${JWT_EXPIRATION_SECONDS:3600}
 
 server:
   port: ${SERVER_PORT:8080}

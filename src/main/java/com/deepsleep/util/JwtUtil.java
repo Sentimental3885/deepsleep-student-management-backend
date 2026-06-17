@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 @Component
 public class JwtUtil {
@@ -16,8 +17,8 @@ public class JwtUtil {
     @Value("${jwt.secret}")
     private String secret;
 
-    @Value("${jwt.expiration}")
-    private long expiration; // 单位：毫秒，如 86400000 = 24小时
+    @Value("${jwt.expiration-seconds}")
+    private long expirationSeconds; // 单位：秒，如 3600 = 1小时
 
     private SecretKey getKey(){
         return Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
@@ -28,7 +29,7 @@ public class JwtUtil {
                 .claim("userId",userId)
                 .claim("role",role)
                 .issuedAt(new Date())
-                .expiration(new Date(System.currentTimeMillis() + expiration))
+                .expiration(new Date(System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(expirationSeconds)))
                 .signWith(getKey())
                 .compact();
     }

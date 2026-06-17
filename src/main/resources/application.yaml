@@ -23,6 +23,7 @@ spring:
           timeout: 5000
           writetimeout: 5000
 
+
   servlet:
     multipart:
       max-file-size: 7MB
@@ -57,7 +58,7 @@ dssm:
 #jwt
 jwt:
   secret: deeepsleep2026studentmanagementbackendsecretkey
-  expiration: 3600
+  expiration-seconds: 3600
 
 server:
   port: 22224
