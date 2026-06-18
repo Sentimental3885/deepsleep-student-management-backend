@@ -1,5 +1,7 @@
 package com.deepsleep.data.dto;
 
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
@@ -14,6 +16,8 @@ public class AddStudentDTO {
     @NotBlank(message = "名称不能为空")
     private String name;
     @NotNull(message = "性别不能为空")
+    @Min(value = 0, message = "性别必须为0-2")
+    @Max(value = 2, message = "性别必须为0-2")
     private Integer gender;
     @NotNull(message = "学院id不能为空")
     private Long did;

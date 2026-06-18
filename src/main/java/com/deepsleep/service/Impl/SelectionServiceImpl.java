@@ -71,7 +71,7 @@ public class SelectionServiceImpl implements SelectionService {
     public Long currentSize(Long cid) {
         LambdaQueryWrapper<CourseSelection> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(CourseSelection::getCourseId, cid)
-                .eq(CourseSelection::getStatus, SelectionStatus.PICKED);
+                .ne(CourseSelection::getStatus, SelectionStatus.DROPPED);
         return selectionMapper.selectCount(wrapper);
     }
 

@@ -1,6 +1,7 @@
 package com.deepsleep.data.enums;
 
 import com.baomidou.mybatisplus.annotation.EnumValue;
+import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -19,4 +20,8 @@ public enum SelectionStatus {
     @EnumValue
     private final Integer value;
 
+    @JsonValue
+    public Integer getValue() {
+        return value;
+    }
 }
